@@ -1,4 +1,4 @@
-import { currency, formatTime } from '../utils/format'
+import { currency, formatTime } from '../../utils/format'
 import './AuctionDetail.css'
 
 export default function AuctionDetail({ auction, now, bidInput, bidError, onBidInputChange, onBidSubmit }) {

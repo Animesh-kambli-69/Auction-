@@ -1,7 +1,7 @@
 import AuctionCard from './AuctionCard'
 import './AuctionList.css'
 
-export default function AuctionList({ auctions, now, selectedId, onSelectAuction }) {
+export default function AuctionList({ auctions, now, selectedId, onSelectAuction, onViewDetail }) {
   return (
     <section className="auction-list">
       <div className="section-title">
@@ -17,6 +17,7 @@ export default function AuctionList({ auctions, now, selectedId, onSelectAuction
             now={now}
             isActive={auction.id === selectedId}
             onClick={() => onSelectAuction(auction.id)}
+            onViewDetail={() => onViewDetail(auction.id)}
           />
         ))}
       </div>

@@ -1,3 +1,14 @@
+.auction-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.auction-card-wrapper.is-active .auction-card {
+  border-color: var(--accent);
+  box-shadow: 0 18px 38px rgba(243, 176, 92, 0.25);
+}
+
 .auction-card {
   text-align: left;
   border: 1px solid transparent;
@@ -7,6 +18,7 @@
   overflow: hidden;
   box-shadow: var(--shadow-soft);
   transition: transform 0.2s ease, border 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
 }
 
 .auction-card:hover {
@@ -15,9 +27,35 @@
   box-shadow: var(--shadow-strong);
 }
 
-.auction-card.is-active {
-  border-color: var(--accent);
-  box-shadow: 0 18px 38px rgba(243, 176, 92, 0.25);
+.view-details-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.view-details-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.view-details-btn:active {
+  transform: translateY(0);
+}
+
+.view-details-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 .auction-card__image {

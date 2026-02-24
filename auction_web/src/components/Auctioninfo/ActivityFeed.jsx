@@ -1,4 +1,4 @@
-import { currency } from '../utils/format'
+import { currency } from '../../utils/format'
 import './ActivityFeed.css'
 
 export default function ActivityFeed({ activity }) {

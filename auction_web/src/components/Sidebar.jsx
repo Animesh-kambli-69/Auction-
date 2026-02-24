@@ -1,5 +1,5 @@
 import { currency } from '../utils/format'
-import ActivityFeed from './ActivityFeed'
+import ActivityFeed from './Auctioninfo/ActivityFeed'
 import './Sidebar.css'
 
 export default function Sidebar({ auctions, stats, activity }) {

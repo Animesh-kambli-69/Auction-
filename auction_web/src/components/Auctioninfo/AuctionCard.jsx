@@ -1,16 +1,24 @@
-import { currency, formatTime } from '../utils/format'
+import { currency, formatTime } from '../../utils/format'
 import './AuctionCard.css'
 
-export default function AuctionCard({ auction, now, isActive, onClick }) {
+export default function AuctionCard({ auction, now, isActive, onClick, onViewDetail }) {
   const timeLeft = formatTime(auction.endAt, now)
   const reserveMet = auction.currentBid >= auction.reserve
   const ended = auction.endAt <= now
 
+  const handleViewDetails = (e) => {
+    e.stopPropagation()
+    if (onViewDetail) {
+      onViewDetail()
+    }
+  }
+
   return (
-    <button
-      className={`auction-card card--${auction.accent} ${isActive ? 'is-active' : ''}`}
-      onClick={onClick}
-    >
+    <div className={`auction-card-wrapper ${isActive ? 'is-active' : ''}`}>
+      <button
+        className={`auction-card card--${auction.accent}`}
+        onClick={onClick}
+      >
       <div className="auction-card__image">
         <span className="pill">{auction.category}</span>
         <span className={`status ${ended ? 'status--ended' : 'status--live'}`}>
@@ -32,5 +40,14 @@ export default function AuctionCard({ auction, now, isActive, onClick }) {
         </div>
       </div>
     </button>
+    {onViewDetail && (
+      <button className="view-details-btn" onClick={handleViewDetails}>
+        View Full Details
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    )}
+  </div>
   )
 }

@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useAuth } from './components/nav bar/nav'
 import Header from './components/Header'
 import Hero from './components/Hero'
-import AuctionList from './components/AuctionList'
-import AuctionDetail from './components/AuctionDetail'
+import AuctionList from './components/Auctioninfo/AuctionList'
+import AuctionDetail from './components/Auctioninfo/AuctionDetail'
+import AuctionDetailPage from './pages/AuctionDetailPage'
 import Sidebar from './components/Sidebar'
 import { initialAuctions } from './data/auctions'
 import { initialActivity } from './data/activity'
@@ -10,12 +12,14 @@ import { currency } from './utils/format'
 import './App.css'
 
 function App() {
+  const { isLoggedIn, currentUser, openLogin } = useAuth()
   const [now, setNow] = useState(Date.now())
   const [auctions, setAuctions] = useState(initialAuctions)
   const [selectedId, setSelectedId] = useState(initialAuctions[0].id)
   const [bidInput, setBidInput] = useState('')
   const [bidError, setBidError] = useState('')
   const [activity, setActivity] = useState(initialActivity)
+  const [viewMode, setViewMode] = useState('list') // 'list' or 'detail'
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000)
@@ -38,6 +42,12 @@ function App() {
   const handleBid = (event) => {
     event.preventDefault()
     if (!selectedAuction) return
+
+    // Check if user is logged in
+    if (!isLoggedIn) {
+      openLogin()
+      return
+    }
 
     const nextBid = Number(bidInput)
     if (!nextBid) {
@@ -75,7 +85,7 @@ function App() {
     setActivity((prev) => [
       {
         id: `activity-${now}`,
-        name: 'You',
+        name: currentUser?.name || 'You',
         action: `placed a bid on ${selectedAuction.title}`,
         amount: nextBid,
         time: 'just now',
@@ -84,35 +94,67 @@ function App() {
     ])
   }
 
+  const handleViewDetail = (auctionId) => {
+    setSelectedId(auctionId)
+    setViewMode('detail')
+  }
+
+  const handleBackToList = () => {
+    setViewMode('list')
+  }
+
+  const handleBidFromDetailPage = () => {
+    if (!isLoggedIn) {
+      openLogin()
+    } else {
+      // You can show a bid modal or form here
+      alert('Bid form would open here')
+    }
+  }
+
   const totalBids = auctions.reduce((sum, auction) => sum + auction.bids, 0)
 
   return (
     <div className="app">
-      <Header stats={stats} totalBids={totalBids} />
 
-      <Hero stats={stats} now={now} />
+      {viewMode === 'list' ? (
+        <>
+          <Header stats={stats} totalBids={totalBids} />
+          <Hero stats={stats} now={now} />
 
-      <main className="layout">
-        <AuctionList
-          auctions={auctions}
+          <main className="layout">
+            <AuctionList
+              auctions={auctions}
+              now={now}
+              selectedId={selectedId}
+              onSelectAuction={setSelectedId}
+              onViewDetail={handleViewDetail}
+            />
+
+            {selectedAuction && (
+              <AuctionDetail
+                auction={selectedAuction}
+                now={now}
+                bidInput={bidInput}
+                bidError={bidError}
+                onBidInputChange={(e) => setBidInput(e.target.value)}
+                onBidSubmit={handleBid}
+              />
+            )}
+
+            <Sidebar auctions={auctions} stats={stats} activity={activity} />
+          </main>
+        </>
+      ) : (
+        <AuctionDetailPage
+          auction={selectedAuction}
           now={now}
-          selectedId={selectedId}
-          onSelectAuction={setSelectedId}
+          onBack={handleBackToList}
+          onBid={handleBidFromDetailPage}
+          isLoggedIn={isLoggedIn}
+          onLoginRequired={openLogin}
         />
-
-        {selectedAuction && (
-          <AuctionDetail
-            auction={selectedAuction}
-            now={now}
-            bidInput={bidInput}
-            bidError={bidError}
-            onBidInputChange={(e) => setBidInput(e.target.value)}
-            onBidSubmit={handleBid}
-          />
-        )}
-
-        <Sidebar auctions={auctions} stats={stats} activity={activity} />
-      </main>
+      )}
     </div>
   )
 }
