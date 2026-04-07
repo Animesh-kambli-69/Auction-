@@ -5,7 +5,7 @@ import User from '../models/User.js';
 import Activity from '../models/Activity.js';
 import Bid from '../models/Bid.js';
 import { asyncHandler, AppError } from '../utils/errorHandler.js';
-import { emitActivityCreated } from '../config/socket.js';
+import { emitActivityCreated, emitListingStatusUpdate } from '../config/socket.js';
 
 // Get all pending approval auctions
 export const getPendingAuctions = asyncHandler(async (req, res, next) => {
@@ -93,6 +93,17 @@ export const approveAuction = asyncHandler(async (req, res, next) => {
     { approvedAt: auction.approvedAt }
   );
 
+  await Activity.logActivity(
+    'auction_approved',
+    auction.seller,
+    auction._id,
+    `your listing "${auction.title}" was approved and is now live`,
+    {
+      approvedAt: auction.approvedAt,
+      notes,
+    }
+  );
+
   // Emit WebSocket event
   const io = req.app.locals.io;
   if (io) {
@@ -111,6 +122,13 @@ export const approveAuction = asyncHandler(async (req, res, next) => {
       metadata: {
         approvedAt: auction.approvedAt,
       },
+    });
+
+    emitListingStatusUpdate(io, auction.seller.toString(), {
+      auctionId: auction._id,
+      auctionTitle: auction.title,
+      status: 'active',
+      notes,
     });
   }
 
@@ -152,6 +170,27 @@ export const rejectAuction = asyncHandler(async (req, res, next) => {
     `rejected auction: ${auction.title}`,
     { reason }
   );
+
+  await Activity.logActivity(
+    'auction_rejected',
+    auction.seller,
+    auction._id,
+    `your listing "${auction.title}" was rejected`,
+    {
+      reason,
+      rejectedAt: auction.rejectedAt,
+    }
+  );
+
+  const io = req.app.locals.io;
+  if (io) {
+    emitListingStatusUpdate(io, auction.seller.toString(), {
+      auctionId: auction._id,
+      auctionTitle: auction.title,
+      status: 'rejected',
+      reason,
+    });
+  }
 
   res.status(200).json({
     success: true,

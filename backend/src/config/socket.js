@@ -120,6 +120,16 @@ export const emitOutbidNotification = (io, userId, payload) => {
   console.log(`🔔 Outbid notification emitted to user ${userId}`);
 };
 
+// Emit listing moderation updates to a specific seller
+export const emitListingStatusUpdate = (io, userId, payload) => {
+  if (!io || !userId) return;
+  io.to(`user_${userId}`).emit('listing_status_updated', {
+    ...payload,
+    timestamp: new Date().toISOString(),
+  });
+  console.log(`📬 Listing status update emitted to user ${userId}`);
+};
+
 // Broadcast auction ended event
 export const emitAuctionEnded = (io, auctionId, winner) => {
   if (!io) return;

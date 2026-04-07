@@ -8,6 +8,7 @@ import {
   onActivityCreated,
   onAuctionEnded,
   onOutbidNotification,
+  onListingStatusUpdated,
   subscribeToAuction,
   unsubscribeFromAuction,
 } from '../services/socket';
@@ -17,6 +18,7 @@ export const useRealtimeUpdates = ({
   onActivity = null,
   onAuctionEnd = null,
   onOutbid = null,
+  onListingStatus = null,
   auctionId = null,
 }) => {
   useEffect(() => {
@@ -32,6 +34,9 @@ export const useRealtimeUpdates = ({
     const unsubscribeActivity = onActivity ? onActivityCreated(onActivity) : null;
     const unsubscribeAuctionEnd = onAuctionEnd ? onAuctionEnded(onAuctionEnd) : null;
     const unsubscribeOutbid = onOutbid ? onOutbidNotification(onOutbid) : null;
+    const unsubscribeListingStatus = onListingStatus
+      ? onListingStatusUpdated(onListingStatus)
+      : null;
 
     // Cleanup on unmount
     return () => {
@@ -42,8 +47,9 @@ export const useRealtimeUpdates = ({
       if (unsubscribeActivity) unsubscribeActivity();
       if (unsubscribeAuctionEnd) unsubscribeAuctionEnd();
       if (unsubscribeOutbid) unsubscribeOutbid();
+      if (unsubscribeListingStatus) unsubscribeListingStatus();
     };
-  }, [auctionId, onBid, onActivity, onAuctionEnd, onOutbid]);
+  }, [auctionId, onBid, onActivity, onAuctionEnd, onOutbid, onListingStatus]);
 };
 
 export default useRealtimeUpdates;

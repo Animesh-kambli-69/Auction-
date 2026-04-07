@@ -13,6 +13,8 @@ import auctionRoutes from './routes/auctionRoutes.js';
 import bidRoutes from './routes/bidRoutes.js';
 import activityRoutes from './routes/activityRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import watchlistRoutes from './routes/watchlistRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 
 const app = express();
 
@@ -51,6 +53,8 @@ app.use('/api/auctions', auctionRoutes);
 app.use('/api/bids', bidRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/watchlist', watchlistRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // ==================== 404 HANDLER ====================
 app.use((req, res) => {

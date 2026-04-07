@@ -126,6 +126,18 @@ export const onOutbidNotification = (callback) => {
   return () => sock.off('outbid_notification', listener);
 };
 
+// Listen for listing approval/rejection updates
+export const onListingStatusUpdated = (callback) => {
+  const sock = getSocket();
+  const listener = (data) => {
+    console.log('📬 Listing status update:', data);
+    callback(data);
+  };
+
+  sock.on('listing_status_updated', listener);
+  return () => sock.off('listing_status_updated', listener);
+};
+
 // Disconnect from server
 export const disconnectSocket = () => {
   if (socket) {
@@ -144,5 +156,6 @@ export default {
   onAuctionEnded,
   onActivityCreated,
   onOutbidNotification,
+  onListingStatusUpdated,
   disconnectSocket,
 };

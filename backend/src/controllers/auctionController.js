@@ -2,27 +2,119 @@
 
 import Auction from '../models/Auction.js';
 import Activity from '../models/Activity.js';
+import User from '../models/User.js';
 import { asyncHandler, AppError } from '../utils/errorHandler.js';
 
-export const getAllAuctions = asyncHandler(async (req, res, next) => {
-  const { category, status, search, limit = 20, offset = 0 } = req.query;
-
-  let filter = { status: 'active' };
-  if (status) filter.status = status;
-  if (category) filter.category = category;
-
-  let query = Auction.find(filter)
-    .populate('seller', 'name avatar rating')
-    .populate('currentBidder', 'name avatar')
-    .sort({ endDate: 1 })
-    .limit(parseInt(limit))
-    .skip(parseInt(offset));
-
-  if (search) {
-    query = query.find({ $text: { $search: search } });
+const parseNonNegativeInteger = (value, fallback) => {
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed) || parsed < 0) {
+    return fallback;
   }
 
-  const auctions = await query.exec();
+  return parsed;
+};
+
+const parseOptionalNumber = (value) => {
+  if (value === undefined || value === null || value === '') {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const resolveSortOption = (sort) => {
+  const sortMap = {
+    newest: { createdAt: -1 },
+    latest: { createdAt: -1 },
+    'price-asc': { currentBid: 1 },
+    'price-desc': { currentBid: -1 },
+    'ending-soon': { endDate: 1 },
+    'most-bids': { bidCount: -1 },
+    'most-viewed': { views: -1 },
+  };
+
+  return sortMap[sort] || { endDate: 1 };
+};
+
+export const getAllAuctions = asyncHandler(async (req, res, next) => {
+  const {
+    category,
+    status,
+    search,
+    condition,
+    priceMin,
+    priceMax,
+    endingSoon,
+    sellerMinRating,
+    sort,
+    limit = 20,
+    offset = 0,
+  } = req.query;
+
+  const parsedLimit = Math.min(parseNonNegativeInteger(limit, 20) || 20, 100);
+  const parsedOffset = parseNonNegativeInteger(offset, 0);
+  const parsedMinPrice = parseOptionalNumber(priceMin);
+  const parsedMaxPrice = parseOptionalNumber(priceMax);
+  const parsedEndingSoonHours = parseOptionalNumber(endingSoon);
+  const parsedSellerMinRating = parseOptionalNumber(sellerMinRating);
+
+  const filter = {
+    status: status || 'active',
+  };
+
+  if (category) {
+    filter.category = category;
+  }
+
+  if (condition) {
+    filter.condition = condition;
+  }
+
+  if (parsedMinPrice !== null || parsedMaxPrice !== null) {
+    filter.currentBid = {};
+    if (parsedMinPrice !== null) {
+      filter.currentBid.$gte = parsedMinPrice;
+    }
+    if (parsedMaxPrice !== null) {
+      filter.currentBid.$lte = parsedMaxPrice;
+    }
+  }
+
+  if (search && search.trim()) {
+    filter.$text = { $search: search.trim() };
+  }
+
+  if (parsedEndingSoonHours !== null && parsedEndingSoonHours > 0) {
+    const now = new Date();
+    const endingSoonCutoff = new Date(now.getTime() + parsedEndingSoonHours * 60 * 60 * 1000);
+
+    filter.endDate = {
+      ...(filter.endDate || {}),
+      $gt: now,
+      $lte: endingSoonCutoff,
+    };
+  }
+
+  if (parsedSellerMinRating !== null && parsedSellerMinRating > 0) {
+    const sellers = await User.find({
+      rating: { $gte: parsedSellerMinRating },
+    }).select('_id');
+
+    filter.seller = {
+      $in: sellers.map((seller) => seller._id),
+    };
+  }
+
+  const sortOption = resolveSortOption(sort);
+
+  const auctions = await Auction.find(filter)
+    .populate('seller', 'name avatar rating')
+    .populate('currentBidder', 'name avatar')
+    .sort(sortOption)
+    .limit(parsedLimit)
+    .skip(parsedOffset);
+
   const total = await Auction.countDocuments(filter);
 
   res.status(200).json({
@@ -30,9 +122,9 @@ export const getAllAuctions = asyncHandler(async (req, res, next) => {
     auctions,
     pagination: {
       total,
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-      pages: Math.ceil(total / parseInt(limit)),
+      limit: parsedLimit,
+      offset: parsedOffset,
+      pages: Math.ceil(total / parsedLimit),
     },
   });
 });
@@ -117,6 +209,40 @@ export const getMyListingRequests = asyncHandler(async (req, res, next) => {
   });
 });
 
+export const getMyAuctions = asyncHandler(async (req, res, next) => {
+  const { status, limit = 20, offset = 0, sort } = req.query;
+
+  const parsedLimit = Math.min(parseNonNegativeInteger(limit, 20) || 20, 100);
+  const parsedOffset = parseNonNegativeInteger(offset, 0);
+
+  const filter = {
+    seller: req.user._id,
+  };
+
+  if (status && status !== 'all') {
+    filter.status = status;
+  }
+
+  const auctions = await Auction.find(filter)
+    .populate('currentBidder', 'name avatar')
+    .sort(resolveSortOption(sort || 'newest'))
+    .limit(parsedLimit)
+    .skip(parsedOffset);
+
+  const total = await Auction.countDocuments(filter);
+
+  res.status(200).json({
+    success: true,
+    auctions,
+    pagination: {
+      total,
+      limit: parsedLimit,
+      offset: parsedOffset,
+      pages: Math.ceil(total / parsedLimit),
+    },
+  });
+});
+
 export const updateAuction = asyncHandler(async (req, res, next) => {
   let auction = await Auction.findById(req.params.id);
 
@@ -162,22 +288,37 @@ export const deleteAuction = asyncHandler(async (req, res, next) => {
   });
 });
 
-export const searchAuctions = asyncHandler(async (req, res, next) => {
-  const { query } = req.query;
+export const getMinimumBid = asyncHandler(async (req, res, next) => {
+  const auction = await Auction.findById(req.params.id).select(
+    'currentBid increment endDate status'
+  );
 
-  if (!query) {
-    return next(new AppError('Search query is required', 400));
+  if (!auction) {
+    return next(new AppError('Auction not found', 404));
   }
 
-  const auctions = await Auction.find({
-    $text: { $search: query },
-    status: 'active',
-  })
-    .populate('seller', 'name avatar')
-    .limit(20);
+  const minimumBid = auction.currentBid + auction.increment;
 
   res.status(200).json({
     success: true,
-    auctions,
+    auctionId: auction._id,
+    isActive: auction.isActive(),
+    currentBid: auction.currentBid,
+    increment: auction.increment,
+    minimumBid,
+    endDate: auction.endDate,
   });
+});
+
+export const searchAuctions = asyncHandler(async (req, res, next) => {
+  const query = req.query.query || req.query.q || req.query.search;
+
+  if (!query || !query.trim()) {
+    return next(new AppError('Search query is required', 400));
+  }
+
+  req.query.search = query.trim();
+  req.query.status = req.query.status || 'active';
+
+  return getAllAuctions(req, res, next);
 });

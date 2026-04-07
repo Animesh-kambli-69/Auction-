@@ -7,8 +7,10 @@ import {
   getAuctionById,
   createAuction,
   getMyListingRequests,
+  getMyAuctions,
   updateAuction,
   deleteAuction,
+  getMinimumBid,
   searchAuctions,
 } from '../controllers/auctionController.js';
 import { protect, authorize } from '../middleware/auth.js';
@@ -29,6 +31,8 @@ const createValidation = [
 router.get('/', getAllAuctions);
 router.get('/search', searchAuctions);
 router.get('/my-requests', protect, getMyListingRequests);
+router.get('/my-auctions', protect, getMyAuctions);
+router.get('/:id/minimum-bid', getMinimumBid);
 router.get('/:id', getAuctionById);
 
 // Protected routes

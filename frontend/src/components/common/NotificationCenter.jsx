@@ -1,6 +1,6 @@
 import './NotificationCenter.css'
 
-export default function NotificationCenter({ notifications, onDismiss, onOpenAuction }) {
+export default function NotificationCenter({ notifications, onDismiss, onOpenAuction, onOpenPage }) {
   if (!notifications.length) return null
 
   return (
@@ -20,6 +20,15 @@ export default function NotificationCenter({ notifications, onDismiss, onOpenAuc
                 onClick={() => onOpenAuction(notification.auctionId)}
               >
                 View auction
+              </button>
+            ) : null}
+            {notification.page ? (
+              <button
+                type="button"
+                className="notification-btn notification-btn--primary"
+                onClick={() => onOpenPage?.(notification.page)}
+              >
+                {notification.actionLabel || 'Open'}
               </button>
             ) : null}
             <button

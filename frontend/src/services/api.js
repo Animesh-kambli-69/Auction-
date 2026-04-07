@@ -75,7 +75,7 @@ export const auctionAPI = {
 
   // Get user's auctions
   getMyAuctions: (params = {}) =>
-    api.get('/api/auctions/user/my-auctions', { params }),
+    api.get('/api/auctions/my-auctions', { params }),
 
   // Submit auction for approval
   submitForApproval: (auctionId) =>

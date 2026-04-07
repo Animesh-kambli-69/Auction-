@@ -1,330 +1,248 @@
-# AuctionHub - Complete Setup & Getting Started
+# AuctionHub
 
-## 📋 Project Overview
+AuctionHub is a full-stack auction platform with live bidding, user authentication, listing approvals, watchlist support, and seller reviews.
 
-**AuctionHub** is a full-stack live auction platform with:
-- React + Vite frontend
-- Node.js + Express backend  
-- MongoDB database
-- Cloudinary image hosting
-- JWT authentication
-- Real-time bidding
+## Stack
 
-## 🚀 Quick Start
+- Frontend: React + Vite
+- Backend: Node.js + Express
+- Database: MongoDB + Mongoose
+- Realtime: Socket.IO
+- Media: Cloudinary
 
-### Option 1: First Time Setup
+## Project Layout
 
-#### Backend
-```bash
-cd server
-npm install
-cp .env.example .env
-# Edit .env with your credentials (MongoDB, Cloudinary, JWT secret)
-npm run dev
-# Server runs on http://localhost:5000
-```
-
-#### Frontend
-```bash
-cd auction_web
-npm install
-# Create .env file with:
-# VITE_API_URL=http://localhost:5000
-# VITE_CLOUDINARY_CLOUD_NAME=your_name
-npm run dev
-# Frontend runs on http://localhost:5173
-```
-
-### Option 2: Subsequent Runs
-```bash
-# Terminal 1 - Backend
-cd server && npm run dev
-
-# Terminal 2 - Frontend
-cd auction_web && npm run dev
-```
-
-## 📁 Project Structure
-
-```
+```text
 Auction-/
-├── auction_web/          # React Frontend (Vite)
-│   ├── src/
-│   │   ├── api/          # Backend API calls
-│   │   ├── components/   # React components
-│   │   ├── hooks/        # Custom hooks
-│   │   ├── constants/    # App constants
-│   │   ├── services/     # Business logic
-│   │   ├── utils/        # Utilities
-│   │   ├── data/         # Mock data
-│   │   └── pages/        # Page components
-│   ├── FRONTEND_SETUP.md # Frontend guide
-│   └── package.json
-│
-├── server/               # Express Backend
-│   ├── src/
-│   │   ├── config/       # Configuration
-│   │   ├── controllers/  # Route handlers
-│   │   ├── routes/       # API routes
-│   │   ├── middleware/   # Express middleware
-│   │   ├── models/       # Mongoose schemas
-│   │   ├── utils/        # Utilities
-│   │   ├── services/     # Business logic
-│   │   └── app.js        # Express app
-│   ├── server.js         # Server entry
-│   ├── README.md         # Backend guide
-│   ├── .env.example      # Env template
-│   └── package.json
-│
-├── FULL_PROJECT_STRUCTURE.md  # Complete structure doc
-├── .gitignore            # Git ignore rules
-└── README.md            # This file
+  backend/      Express API + MongoDB models
+  frontend/     React app (Vite)
+  README.md     This file
 ```
 
-## 🔧 Technology Stack
+## Prerequisites
 
-### Frontend
-- **React 19** - UI library
-- **Vite** - Build tool
-- **Fetch API** - HTTP requests
-- **React Context** - State management
-- **CSS** - Styling
+Install these before setup:
 
-### Backend
-- **Node.js** - Runtime
-- **Express** - Web framework
-- **MongoDB** - Database
-- **Mongoose** - ODM
-- **JWT** - Authentication
-- **Cloudinary** - Image hosting
+1. Node.js 18+ and npm
+2. MongoDB (local) OR MongoDB Atlas URI
+3. Cloudinary account (for image uploads)
 
-## 🔐 Environment Setup
+## Installation (First Time)
 
-### Backend (.env)
-```env
-PORT=5000
-NODE_ENV=development
-MONGODB_URI=mongodb://localhost:27017/auctionhub
-JWT_SECRET=your_secret_key
-CLOUDINARY_CLOUD_NAME=your_name
-CLOUDINARY_API_KEY=your_key
-CLOUDINARY_API_SECRET=your_secret
-FRONTEND_URL=http://localhost:5173
-```
+### 1) Clone and open the project
 
-### Frontend (.env)
-```env
-VITE_API_URL=http://localhost:5000
-VITE_CLOUDINARY_CLOUD_NAME=your_name
-```
-
-## 📚 Documentation
-
-- **[FULL_PROJECT_STRUCTURE.md](./FULL_PROJECT_STRUCTURE.md)** - Detailed project structure
-- **[server/README.md](./server/README.md)** - Backend API documentation
-- **[auction_web/FRONTEND_SETUP.md](./auction_web/FRONTEND_SETUP.md)** - Frontend setup guide
-- **[auction_web/BACKEND_FRONTEND_TASK_GUIDE.md](./auction_web/BACKEND_FRONTEND_TASK_GUIDE.md)** - Development tasks
-
-## 🎯 Key Features
-
-### User Features
-- ✅ Register & Login (JWT)
-- ✅ Browse active auctions
-- ✅ Search & filter by category
-- ✅ View auction details
-- ✅ Place bids with validation
-- ✅ Track bid history
-- ✅ Activity feed
-- ✅ Upload auction photos (Cloudinary)
-
-### Technical Features
-- ✅ MongoDB for data persistence
-- ✅ Cloudinary for image storage
-- ✅ JWT authentication
-- ✅ RESTful API design
-- ✅ Input validation
-- ✅ Error handling
-- ✅ Loading states
-- ✅ Responsive design
-
-## 🔌 API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Create account
-- `POST /api/auth/login` - Login
-- `GET /api/auth/me` - Current user
-- `PUT /api/auth/profile` - Update profile
-
-### Auctions
-- `GET /api/auctions` - List all auctions
-- `GET /api/auctions/:id` - Get auction details
-- `POST /api/auctions` - Create auction (protected)
-- `PUT /api/auctions/:id` - Update auction (protected)
-- `DELETE /api/auctions/:id` - Delete auction (protected)
-- `GET /api/auctions/search` - Search auctions
-
-### Bidding
-- `POST /api/bids` - Place bid (protected)
-- `GET /api/bids/auction/:id` - Get bid history
-- `GET /api/bids/my-bids` - User's bids (protected)
-- `POST /api/bids/validate` - Validate bid
-
-### Activity
-- `GET /api/activity` - Public activity feed
-- `GET /api/activity/auction/:id` - Auction activity
-- `GET /api/activity/my-activity` - User activity (protected)
-
-## ⚙️ Database Models
-
-### User
-- name, email, password (hashed)
-- avatar, bio, location, phone
-- role (buyer/seller/admin)
-- rating, totalBids, totalWins
-
-### Auction
-- title, subtitle, description
-- category, condition
-- startingPrice, currentBid, increment
-- images (Cloudinary URLs)
-- seller, currentBidder, winner
-- status, endDate, bidCount
-
-### Bid
-- amount, auction ID, bidder ID
-- status, timestamp
-
-### Activity
-- type (bid_placed, auction_won, etc.)
-- user ID, auction ID
-- description, metadata
-
-## 🧪 Testing Workflows
-
-### Register User
 ```bash
-curl -X POST http://localhost:5000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "John Doe",
-    "email": "john@example.com",
-    "password": "SecurePass123",
-    "confirmPassword": "SecurePass123"
-  }'
+git clone <your-repository-url>
+cd Auction-
 ```
 
-### Get Auctions
+### 2) Install backend dependencies
+
 ```bash
-curl http://localhost:5000/api/auctions
-```
-
-### Place Bid (with token)
-```bash
-curl -X POST http://localhost:5000/api/bids \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "auctionId": "auction_id",
-    "bidAmount": 750
-  }'
-```
-
-## ✅ Development Checklist
-
-- [ ] MongoDB running locally or Atlas connected
-- [ ] Cloudinary account created & credentials added
-- [ ] Backend dependencies installed
-- [ ] Frontend dependencies installed
-- [ ] Backend running on port 5000
-- [ ] Frontend running on port 5173
-- [ ] Can register/login user
-- [ ] Can fetch auctions from database
-- [ ] Can place bids
-- [ ] Can upload images to Cloudinary
-- [ ] Activity feed showing bids
-- [ ] All components connected to APIs
-
-## 🚨 Troubleshooting
-
-### "Cannot find module" errors
-```bash
-# Reinstall dependencies
-rm -rf node_modules package-lock.json
+cd backend
 npm install
+cd ..
 ```
 
-### MongoDB connection failed
-- Ensure MongoDB is running: `mongod`
-- Check MONGODB_URI in .env
-- For Atlas, verify IP whitelist
+### 3) Install frontend dependencies
 
-### Cloudinary upload fails
-- Verify credentials in .env
-- Check file size (max 10MB)
-- Ensure correct cloud name
-
-### CORS errors
-- Backend has CORS enabled for port 5173
-- Check FRONTEND_URL in backend .env
-
-### JWT token errors
-- Token might be expired
-- Try logging out and back in
-- Verify JWT_SECRET in .env
-
-## 📦 Deployment
-
-### Frontend
 ```bash
+cd frontend
+npm install
+cd ..
+```
+
+### 4) Configure backend environment
+
+Create backend/.env from backend/.env.example.
+
+Linux/macOS:
+
+```bash
+cd backend
+cp .env.example .env
+```
+
+Windows PowerShell:
+
+```powershell
+Set-Location backend
+Copy-Item .env.example .env
+```
+
+Edit backend/.env and set real values:
+
+- MONGODB_URI
+- JWT_SECRET
+- JWT_REFRESH_SECRET
+- CLOUDINARY_NAME
+- CLOUDINARY_API_KEY
+- CLOUDINARY_API_SECRET
+- FRONTEND_URL (or FRONTEND_URLS)
+
+### 5) Configure frontend environment
+
+Create frontend/.env from frontend/.env.example.
+
+Linux/macOS:
+
+```bash
+cd frontend
+cp .env.example .env
+```
+
+Windows PowerShell:
+
+```powershell
+Set-Location frontend
+Copy-Item .env.example .env
+```
+
+Edit frontend/.env:
+
+- VITE_API_URL=http://localhost:5000
+- VITE_CLOUDINARY_CLOUD_NAME=<your_cloud_name>
+
+## Optional: Seed Test Data
+
+Run this once to create sample users and auctions:
+
+```bash
+cd backend
+node seed.js
+```
+
+Sample users from seeding:
+
+- seller@example.com / password123
+- buyer@example.com / password123
+- superadmin@example.com / password123
+
+## Run the App
+
+Use two terminals.
+
+Terminal 1 (Backend):
+
+```bash
+cd backend
+npm run dev
+```
+
+Terminal 2 (Frontend):
+
+```bash
+cd frontend
+npm run dev
+```
+
+Default URLs:
+
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:5000
+- Health check: http://localhost:5000/api/health
+
+## Build for Production
+
+Frontend:
+
+```bash
+cd frontend
 npm run build
-# Deploy dist/ to Vercel, Netlify, or hosting
 ```
 
-### Backend
-```bash
-# Deploy to Heroku, Render, Railway, or similar
-# Set environment variables in hosting platform
-```
-
-## 📝 Useful Commands
+Backend:
 
 ```bash
-# Backend
-cd server
-npm install          # Install dependencies
-npm run dev         # Start development server
-npm start           # Start production server
-npm run lint        # Run linter
-
-# Frontend
-cd auction_web
-npm install         # Install dependencies
-npm run dev         # Start dev server
-npm run build       # Build for production
-npm run preview     # Preview production build
-npm run lint        # Run linter
+cd backend
+npm start
 ```
 
-## 🎓 Learning Resources
+## Common Commands
 
-- [React Documentation](https://react.dev)
-- [Express.js Guide](https://expressjs.com/)
-- [MongoDB & Mongoose](https://mongoosejs.com/)
-- [Cloudinary API](https://cloudinary.com/documentation)
-- [JWT](https://jwt.io/)
+Backend:
 
-## 📞 Support
+```bash
+npm run dev
+npm start
+npm run lint
+```
 
-For issues or questions:
-1. Check documentation files
-2. Review API endpoint docs in server/README.md
-3. Check browser console for errors
-4. Check server logs for backend errors
+Frontend:
 
-## 📄 License
+```bash
+npm run dev
+npm run build
+npm run preview
+npm run lint
+```
+
+## Troubleshooting
+
+### 1) ERR_CONNECTION_REFUSED from frontend
+
+Cause: backend is not running.
+
+Fix:
+
+1. Start backend from the backend folder.
+2. Confirm health URL: http://localhost:5000/api/health.
+
+### 2) Port already in use
+
+If you see port conflicts:
+
+- Backend on 5000 already in use
+- Frontend on 5173 already in use
+
+Fix options:
+
+1. Stop old Node processes using those ports.
+2. Or run frontend on a different port.
+3. If frontend is not on 5173, update backend/.env with FRONTEND_URLS to include that port.
+
+Example:
+
+```env
+FRONTEND_URLS=http://localhost:5173,http://localhost:5174
+```
+
+### 3) CORS blocked origin
+
+Cause: frontend origin is missing from backend allowed origins.
+
+Fix:
+
+1. Update backend/.env FRONTEND_URL or FRONTEND_URLS.
+2. Restart backend.
+
+### 4) MongoDB connection errors
+
+1. Ensure MongoDB service is running (local), or
+2. Verify Atlas URI and IP whitelist.
+
+### 5) Cloudinary upload errors
+
+1. Verify CLOUDINARY_NAME/API_KEY/API_SECRET in backend/.env.
+2. Verify VITE_CLOUDINARY_CLOUD_NAME in frontend/.env.
+
+## API Overview
+
+Core endpoints:
+
+- Auth: /api/auth/*
+- Auctions: /api/auctions/*
+- Bids: /api/bids/*
+- Activity: /api/activity/*
+- Watchlist: /api/watchlist/*
+- Reviews: /api/reviews/*
+- Admin: /api/admin/*
+
+Detailed API docs:
+
+- backend/README.md
+- frontend/README.md
+
+## License
 
 MIT
-
----
-
-**Ready to build? Start with the backend setup, then frontend. Good luck! 🚀**

@@ -1,7 +1,23 @@
 import { currency, formatTime } from '../../utils/format'
 import './AuctionDetail.css'
 
-export default function AuctionDetail({ auction, now, bidInput, bidError, onBidInputChange, onBidSubmit }) {
+export default function AuctionDetail({
+  auction,
+  now,
+  bidInput,
+  bidError,
+  bidNotice,
+  onBidInputChange,
+  onBidSubmit,
+  onQuickBid,
+}) {
+  const minimumBid = auction.minimumNextBid ?? (auction.currentBid + auction.increment)
+  const quickBidValues = [
+    minimumBid,
+    minimumBid + auction.increment,
+    minimumBid + auction.increment * 2,
+  ]
+
   return (
     <section className="detail">
       <div className={`detail__hero detail__hero--${auction.accent}`}>
@@ -41,13 +57,26 @@ export default function AuctionDetail({ auction, now, bidInput, bidError, onBidI
               id="bid-input"
               type="number"
               inputMode="numeric"
-              min={auction.currentBid + auction.increment}
-              placeholder={currency.format(auction.currentBid + auction.increment)}
+              min={minimumBid}
+              placeholder={currency.format(minimumBid)}
               value={bidInput}
               onChange={onBidInputChange}
             />
           </div>
+          <div className="bid__quick">
+            {quickBidValues.map((amount) => (
+              <button
+                key={amount}
+                className="quick-bid-btn"
+                type="button"
+                onClick={() => onQuickBid?.(amount)}
+              >
+                {currency.format(amount)}
+              </button>
+            ))}
+          </div>
           {bidError ? <p className="error">{bidError}</p> : null}
+          {!bidError && bidNotice ? <p className="bid__notice">{bidNotice}</p> : null}
           <button className="button button--primary" type="submit">
             Place bid
           </button>

@@ -1,22 +1,32 @@
 import { currency, formatTime } from '../../utils/format';
 import './AuctionDetailPage.css';
 
-const AuctionDetailPage = ({ auction, now, onBack, onBid, isLoggedIn, onLoginRequired }) => {
+const AuctionDetailPage = ({
+  auction,
+  now,
+  onBack,
+  isLoggedIn,
+  onLoginRequired,
+  bidInput,
+  bidError,
+  bidNotice,
+  onBidInputChange,
+  onBidSubmit,
+  onQuickBid,
+}) => {
   const timeLeft = formatTime(auction.endAt, now);
   const reserveMet = auction.currentBid >= auction.reserve;
   const ended = auction.endAt <= now;
+  const minimumBid = auction.minimumNextBid ?? (auction.currentBid + auction.increment);
+  const quickBidValues = [
+    minimumBid,
+    minimumBid + auction.increment,
+    minimumBid + auction.increment * 2,
+  ];
   const timeRemaining = auction.endAt - now;
   const daysLeft = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
   const hoursLeft = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutesLeft = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-
-  const handleBidClick = () => {
-    if (!isLoggedIn) {
-      onLoginRequired();
-    } else {
-      onBid();
-    }
-  };
 
   return (
     <div className="auction-detail-page">
@@ -176,32 +186,59 @@ const AuctionDetailPage = ({ auction, now, onBack, onBid, isLoggedIn, onLoginReq
               </div>
             </div>
 
-            {/* Bid Button */}
+            {/* Bid Action */}
             {!ended && (
               <div className="bid-action">
-                <button 
-                  className="bid-now-button" 
-                  onClick={handleBidClick}
-                >
-                  {isLoggedIn ? (
-                    <>
+                {isLoggedIn ? (
+                  <form className="bid-form" onSubmit={onBidSubmit}>
+                    <label htmlFor="detail-bid-input">Enter your bid</label>
+                    <input
+                      id="detail-bid-input"
+                      type="number"
+                      inputMode="numeric"
+                      min={minimumBid}
+                      placeholder={currency.format(minimumBid)}
+                      value={bidInput}
+                      onChange={onBidInputChange}
+                    />
+
+                    <div className="detail-quick-bids">
+                      {quickBidValues.map((amount) => (
+                        <button
+                          key={amount}
+                          type="button"
+                          className="detail-quick-bid-btn"
+                          onClick={() => onQuickBid?.(amount)}
+                        >
+                          {currency.format(amount)}
+                        </button>
+                      ))}
+                    </div>
+
+                    {bidError ? <p className="detail-bid-message detail-bid-message--error">{bidError}</p> : null}
+                    {!bidError && bidNotice ? <p className="detail-bid-message detail-bid-message--ok">{bidNotice}</p> : null}
+
+                    <button className="bid-now-button" type="submit">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                       </svg>
                       Place Your Bid
-                    </>
-                  ) : (
-                    <>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                      </svg>
-                      Login to Bid
-                    </>
-                  )}
-                </button>
+                    </button>
+                  </form>
+                ) : (
+                  <button
+                    className="bid-now-button"
+                    onClick={onLoginRequired}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    Login to Bid
+                  </button>
+                )}
                 <p className="minimum-bid">
-                  Minimum bid: {currency.format(auction.currentBid + auction.increment)}
+                  Minimum bid: {currency.format(minimumBid)}
                 </p>
               </div>
             )}

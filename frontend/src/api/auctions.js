@@ -88,10 +88,13 @@ export const getEndingSoonAuctions = async (hoursAhead = 24) => {
 
 /**
  * Get auctions created by current user (seller)
+ * @param {object} options - Filter and pagination options
  * @returns {Promise} Array of user's auctions
  */
-export const getMyAuctions = async () => {
-  return apiCall('/api/auctions/my-auctions', { method: 'GET' });
+export const getMyAuctions = async (options = {}) => {
+  const queryParams = new URLSearchParams(options).toString();
+  const endpoint = `/api/auctions/my-auctions${queryParams ? `?${queryParams}` : ''}`;
+  return apiCall(endpoint, { method: 'GET' });
 };
 
 /**

@@ -10,12 +10,20 @@ import {
   emitActivityCreated,
 } from '../config/socket.js';
 
+const ANTI_SNIPE_WINDOW_MS = 2 * 60 * 1000;
+const ANTI_SNIPE_EXTENSION_MS = 2 * 60 * 1000;
+const DUPLICATE_BID_WINDOW_MS = 10 * 1000;
+
 export const placeBid = asyncHandler(async (req, res, next) => {
   const { auctionId, bidAmount } = req.body;
   const parsedBidAmount = Number(bidAmount);
 
   if (!req.user) {
     return next(new AppError('User not authenticated', 401));
+  }
+
+  if (!Number.isFinite(parsedBidAmount) || parsedBidAmount <= 0) {
+    return next(new AppError('Bid amount must be a positive number', 400));
   }
 
   // Find auction
@@ -41,6 +49,21 @@ export const placeBid = asyncHandler(async (req, res, next) => {
   const minimumBid = auction.currentBid + auction.increment;
   if (parsedBidAmount < minimumBid) {
     return next(new AppError(`Minimum bid is ${minimumBid}`, 400));
+  }
+
+  // Prevent accidental duplicate submissions in rapid succession
+  const latestUserBid = await Bid.findOne({
+    auction: auctionId,
+    bidder: req.user._id,
+  }).sort({ createdAt: -1 });
+
+  if (latestUserBid && latestUserBid.amount === parsedBidAmount) {
+    const elapsedMs = Date.now() - new Date(latestUserBid.createdAt).getTime();
+    if (elapsedMs < DUPLICATE_BID_WINDOW_MS) {
+      return next(
+        new AppError('Duplicate bid detected. Please wait a moment before bidding again.', 400)
+      );
+    }
   }
 
   // Mark previous highest bid as outbid
@@ -75,6 +98,16 @@ export const placeBid = asyncHandler(async (req, res, next) => {
   auction.currentBidder = req.user._id;
   auction.bidCount += 1;
 
+  let wasExtended = false;
+  let extendedUntil = null;
+
+  const timeToEndMs = new Date(auction.endDate).getTime() - Date.now();
+  if (timeToEndMs > 0 && timeToEndMs <= ANTI_SNIPE_WINDOW_MS) {
+    auction.endDate = new Date(new Date(auction.endDate).getTime() + ANTI_SNIPE_EXTENSION_MS);
+    wasExtended = true;
+    extendedUntil = auction.endDate;
+  }
+
   const isExistingBidder = auction.bidders.some(
     (bidderId) => bidderId.toString() === req.user._id.toString()
   );
@@ -105,6 +138,10 @@ export const placeBid = asyncHandler(async (req, res, next) => {
       currentBid: auction.currentBid,
       bidCount: auction.bidCount,
       bidderCount: auction.bidderCount,
+      minimumNextBid: auction.currentBid + auction.increment,
+      endDate: auction.endDate,
+      wasExtended,
+      extendedUntil,
       bidder: {
         _id: req.user._id,
         name: req.user.name,
@@ -160,6 +197,9 @@ export const placeBid = asyncHandler(async (req, res, next) => {
       currentBid: auction.currentBid,
       bidCount: auction.bidCount,
       bidderCount: auction.bidderCount,
+      endDate: auction.endDate,
+      wasExtended,
+      extendedUntil,
       minimumNextBid: auction.currentBid + auction.increment,
     },
   });
@@ -224,10 +264,19 @@ export const getWonAuctions = asyncHandler(async (req, res, next) => {
 
 export const validateBid = asyncHandler(async (req, res, next) => {
   const { auctionId, bidAmount } = req.body;
+  const parsedBidAmount = Number(bidAmount);
 
   const auction = await Auction.findById(auctionId);
   if (!auction) {
     return next(new AppError('Auction not found', 404));
+  }
+
+  if (!Number.isFinite(parsedBidAmount) || parsedBidAmount <= 0) {
+    return res.status(200).json({
+      success: true,
+      valid: false,
+      message: 'Bid amount must be a positive number',
+    });
   }
 
   if (!auction.isActive()) {
@@ -235,22 +284,34 @@ export const validateBid = asyncHandler(async (req, res, next) => {
       success: false,
       valid: false,
       message: 'Auction has ended',
+      endDate: auction.endDate,
     });
   }
 
   const minimumBid = auction.currentBid + auction.increment;
-  if (bidAmount < minimumBid) {
+  if (parsedBidAmount < minimumBid) {
     return res.status(200).json({
       success: true,
       valid: false,
       message: `Minimum bid is ${minimumBid}`,
       minimumBid,
+      endDate: auction.endDate,
     });
   }
+
+  const timeToEndMs = new Date(auction.endDate).getTime() - Date.now();
+  const closingSoon = timeToEndMs > 0 && timeToEndMs <= ANTI_SNIPE_WINDOW_MS;
 
   res.status(200).json({
     success: true,
     valid: true,
-    message: 'Bid is valid',
+    message: closingSoon
+      ? 'Bid is valid. Late bids will extend the auction by 2 minutes.'
+      : 'Bid is valid',
+    minimumBid,
+    currentBid: auction.currentBid,
+    increment: auction.increment,
+    closingSoon,
+    endDate: auction.endDate,
   });
 });
