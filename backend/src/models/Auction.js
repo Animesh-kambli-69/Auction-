@@ -86,8 +86,35 @@ const auctionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'ended', 'cancelled'],
-      default: 'active',
+      enum: ['pending_approval', 'approved', 'active', 'ended', 'rejected', 'cancelled'],
+      default: 'pending_approval',
+    },
+    submittedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    approvedAt: {
+      type: Date,
+      default: null,
+    },
+    approvalNotes: {
+      type: String,
+      default: '',
+      maxlength: 500,
+    },
+    rejectionReason: {
+      type: String,
+      default: '',
+      maxlength: 500,
+    },
+    rejectedAt: {
+      type: Date,
+      default: null,
     },
     startDate: {
       type: Date,

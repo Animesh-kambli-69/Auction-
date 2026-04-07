@@ -1,9 +1,11 @@
 // server.js - Server Startup Entry Point
 
 import dotenv from 'dotenv';
+import { createServer } from 'http';
 import app from './src/app.js';
 import { connectDB } from './src/config/database.js';
 import { configureCloudinary } from './src/config/cloudinary.js';
+import { initializeSocket } from './src/config/socket.js';
 
 // Load environment variables
 dotenv.config();
@@ -21,8 +23,12 @@ const startServer = async () => {
     console.log('🖼️  Configuring Cloudinary...');
     configureCloudinary();
 
-    // Start listening
-    app.listen(PORT, () => {
+    // Start HTTP and WebSocket servers
+    const httpServer = createServer(app);
+    const io = initializeSocket(httpServer);
+    app.locals.io = io;
+
+    httpServer.listen(PORT, () => {
       console.log(`
 ╔════════════════════════════════════════╗
 ║   🚀 AuctionHub Server Started 🚀     ║

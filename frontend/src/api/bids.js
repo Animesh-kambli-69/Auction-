@@ -23,7 +23,7 @@ export const placeBid = async (auctionId, bidAmount) => {
  */
 export const getBidHistory = async (auctionId, options = {}) => {
   const queryParams = new URLSearchParams(options).toString();
-  const endpoint = `/api/auctions/${auctionId}/bids${queryParams ? `?${queryParams}` : ''}`;
+  const endpoint = `/api/bids/auction/${auctionId}${queryParams ? `?${queryParams}` : ''}`;
   return apiCall(endpoint, { method: 'GET' });
 };
 
@@ -43,7 +43,7 @@ export const getMyBids = async (options = {}) => {
  * @returns {Promise} Array of won auctions
  */
 export const getWonAuctions = async () => {
-  return apiCall('/api/bids/won', { method: 'GET' });
+  return apiCall('/api/bids/won-auctions', { method: 'GET' });
 };
 
 /**

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { loginUser, registerUser } from '../../api/auth';
 import './Login.css';
 
 const Login = ({ onClose, onLogin }) => {
@@ -10,6 +11,8 @@ const Login = ({ onClose, onLogin }) => {
     name: '',
     phone: ''
   });
+  const [authError, setAuthError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -18,29 +21,46 @@ const Login = ({ onClose, onLogin }) => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSignUp) {
-      console.log('Sign up:', formData);
-      // Add your sign-up logic here
-      // After successful signup, log the user in
-      if (onLogin) {
-        onLogin({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone
-        });
+
+    if (isSignUp && formData.password !== formData.confirmPassword) {
+      setAuthError('Passwords do not match.');
+      return;
+    }
+
+    setAuthError('');
+    setIsSubmitting(true);
+
+    try {
+      let response;
+
+      if (isSignUp) {
+        response = await registerUser(
+          formData.name.trim(),
+          formData.email.trim(),
+          formData.password,
+          formData.confirmPassword
+        );
+      } else {
+        response = await loginUser(formData.email.trim(), formData.password);
       }
-    } else {
-      console.log('Login:', { email: formData.email, password: formData.password });
-      // Add your login logic here
-      // After successful login
-      if (onLogin) {
-        onLogin({
-          name: formData.email.split('@')[0], // Use part of email as name
-          email: formData.email
-        });
+
+      if (onLogin && response?.user) {
+        onLogin(response.user);
       }
+
+      setFormData({
+        email: '',
+        password: '',
+        confirmPassword: '',
+        name: '',
+        phone: ''
+      });
+    } catch (error) {
+      setAuthError(error.message || 'Authentication failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -76,6 +96,7 @@ const Login = ({ onClose, onLogin }) => {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="John Doe"
+                disabled={isSubmitting}
                 required={isSignUp}
               />
             </div>
@@ -91,6 +112,7 @@ const Login = ({ onClose, onLogin }) => {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="+1 (555) 000-0000"
+                disabled={isSubmitting}
                 required={isSignUp}
               />
             </div>
@@ -105,6 +127,7 @@ const Login = ({ onClose, onLogin }) => {
               value={formData.email}
               onChange={handleChange}
               placeholder="you@example.com"
+              disabled={isSubmitting}
               required
             />
           </div>
@@ -118,6 +141,7 @@ const Login = ({ onClose, onLogin }) => {
               value={formData.password}
               onChange={handleChange}
               placeholder="••••••••"
+              disabled={isSubmitting}
               required
             />
           </div>
@@ -132,10 +156,13 @@ const Login = ({ onClose, onLogin }) => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="••••••••"
+                disabled={isSubmitting}
                 required={isSignUp}
               />
             </div>
           )}
+
+          {authError ? <p className="auth-error">{authError}</p> : null}
 
           {!isSignUp && (
             <div className="form-options">
@@ -147,8 +174,8 @@ const Login = ({ onClose, onLogin }) => {
             </div>
           )}
 
-          <button type="submit" className="submit-btn">
-            {isSignUp ? 'Sign Up' : 'Login'}
+          <button type="submit" className="submit-btn" disabled={isSubmitting}>
+            {isSubmitting ? (isSignUp ? 'Signing up...' : 'Logging in...') : (isSignUp ? 'Sign Up' : 'Login')}
           </button>
         </form>
 
@@ -157,7 +184,7 @@ const Login = ({ onClose, onLogin }) => {
         </div>
 
         <div className="social-login">
-          <button className="social-btn google-btn">
+          <button type="button" className="social-btn google-btn" disabled={isSubmitting}>
             <svg width="20" height="20" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -174,7 +201,11 @@ const Login = ({ onClose, onLogin }) => {
             <button 
               type="button" 
               className="toggle-btn" 
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setAuthError('');
+              }}
+              disabled={isSubmitting}
             >
               {isSignUp ? 'Login' : 'Sign up'}
             </button>

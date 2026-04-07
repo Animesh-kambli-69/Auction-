@@ -7,7 +7,7 @@ import { asyncHandler, AppError } from '../utils/errorHandler.js';
 export const getAllAuctions = asyncHandler(async (req, res, next) => {
   const { category, status, search, limit = 20, offset = 0 } = req.query;
 
-  let filter = {};
+  let filter = { status: 'active' };
   if (status) filter.status = status;
   if (category) filter.category = category;
 
@@ -78,18 +78,42 @@ export const createAuction = asyncHandler(async (req, res, next) => {
     location,
     images: images || [],
     seller: req.user._id,
+    status: 'pending_approval',
+    submittedAt: new Date(),
   });
 
   await Activity.logActivity(
-    'auction_created',
+    'auction_submitted',
     req.user._id,
     auction._id,
-    `created auction "${title}"`
+    `submitted auction "${title}" for approval`
   );
 
   res.status(201).json({
     success: true,
+    message: 'Auction request submitted and is pending superadmin approval',
     auction,
+  });
+});
+
+export const getMyListingRequests = asyncHandler(async (req, res, next) => {
+  const { limit = 20, offset = 0 } = req.query;
+
+  const listings = await Auction.find({ seller: req.user._id })
+    .sort({ createdAt: -1 })
+    .limit(parseInt(limit))
+    .skip(parseInt(offset));
+
+  const total = await Auction.countDocuments({ seller: req.user._id });
+
+  res.status(200).json({
+    success: true,
+    listings,
+    pagination: {
+      total,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+    },
   });
 });
 

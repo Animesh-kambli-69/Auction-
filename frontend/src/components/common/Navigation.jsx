@@ -1,6 +1,8 @@
-import { useState, useRef, useEffect, createContext, useContext } from 'react';
+import { useState, useRef, useEffect, createContext, useContext, useCallback } from 'react';
 import Login from '../auth/Login';
 import { filterCategories } from '../../data/filters';
+import { getStoredUser, isAuthenticated, logoutUser } from '../../api/auth';
+import { syncSocketAuth } from '../../services/socket';
 import './Navigation.css';
 
 // Create Auth Context
@@ -17,19 +19,36 @@ export const useAuth = () => {
 
 // Auth Provider Component
 export const AuthProvider = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => isAuthenticated() && !!getStoredUser());
+  const [currentUser, setCurrentUser] = useState(() => getStoredUser());
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [activePage, setActivePage] = useState('home');
 
   const login = (userData) => {
     setIsLoggedIn(true);
     setCurrentUser(userData);
+    setActivePage('home');
+    localStorage.setItem('user', JSON.stringify(userData));
+    syncSocketAuth();
     setShowLoginModal(false);
   };
 
-  const logout = () => {
+  const updateCurrentUser = useCallback((userData) => {
+    setCurrentUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+  }, []);
+
+  const logout = async () => {
+    try {
+      await logoutUser();
+    } catch {
+      console.warn('Logout request failed. Local session already cleared.');
+    }
+
     setIsLoggedIn(false);
     setCurrentUser(null);
+    setActivePage('home');
+    syncSocketAuth();
   };
 
   const openLogin = () => setShowLoginModal(true);
@@ -39,7 +58,10 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={{ 
       isLoggedIn, 
       currentUser, 
+      activePage,
+      setActivePage,
       login, 
+      updateCurrentUser,
       logout, 
       showLoginModal, 
       openLogin, 
@@ -51,7 +73,7 @@ export const AuthProvider = ({ children }) => {
 };
 
 const Nav = () => {
-  const { isLoggedIn, currentUser, login, logout, showLoginModal, openLogin, closeLogin } = useAuth();
+  const { isLoggedIn, currentUser, setActivePage, login, logout, showLoginModal, openLogin, closeLogin } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('all');
@@ -77,8 +99,8 @@ const Nav = () => {
     login(userData);
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     setShowUserMenu(false);
   };
 
@@ -94,6 +116,25 @@ const Nav = () => {
     console.log('Filter selected:', filterId);
   };
 
+  const handleGoHome = () => {
+    setActivePage('home');
+  };
+
+  const handleOpenProfile = () => {
+    setActivePage('profile');
+    setShowUserMenu(false);
+  };
+
+  const handleOpenListingRequest = () => {
+    setActivePage('listing-request');
+    setShowUserMenu(false);
+  };
+
+  const handleOpenSuperAdminDashboard = () => {
+    setActivePage('superadmin-dashboard');
+    setShowUserMenu(false);
+  };
+
   const currentFilter = filterCategories.find(f => f.id === selectedFilter) || filterCategories[0];
 
   return (
@@ -102,7 +143,7 @@ const Nav = () => {
         <div className="nav-container">
           {/* Logo/Brand */}
           <div className="nav-brand">
-            <h2>AuctionHub</h2>
+            <h2 onClick={handleGoHome}>AuctionHub</h2>
           </div>
 
           {/* Search Bar */}
@@ -196,19 +237,27 @@ const Nav = () => {
                       </div>
                     </div>
                     <div className="user-dropdown-menu">
-                      <button className="menu-item">
+                      <button className="menu-item" onClick={handleOpenProfile}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                           <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                         My Profile
                       </button>
-                      <button className="menu-item">
+                      <button className="menu-item" onClick={handleOpenListingRequest}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                         </svg>
-                        My Bids
+                        List Auction Request
                       </button>
+                      {(currentUser?.role === 'admin' || currentUser?.role === 'superadmin') && (
+                        <button className="menu-item" onClick={handleOpenSuperAdminDashboard}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M12 2l3.09 6.26L22 9l-5 4.87L18.18 21 12 17.77 5.82 21 7 13.87 2 9l6.91-.74L12 2z"></path>
+                          </svg>
+                          Super Admin Dashboard
+                        </button>
+                      )}
                       <button className="menu-item" onClick={handleLogout}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>

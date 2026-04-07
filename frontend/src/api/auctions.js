@@ -93,3 +93,23 @@ export const getEndingSoonAuctions = async (hoursAhead = 24) => {
 export const getMyAuctions = async () => {
   return apiCall('/api/auctions/my-auctions', { method: 'GET' });
 };
+
+/**
+ * Submit listing request for superadmin approval
+ * @param {object} auctionData - Listing details submitted by user
+ * @returns {Promise} Pending listing record
+ */
+export const submitAuctionRequest = async (auctionData) => {
+  return createAuction(auctionData);
+};
+
+/**
+ * Get listing requests created by current user
+ * @param {object} options - Pagination options
+ * @returns {Promise} Array of listing requests and moderation status
+ */
+export const getMyListingRequests = async (options = {}) => {
+  const queryParams = new URLSearchParams(options).toString();
+  const endpoint = `/api/auctions/my-requests${queryParams ? `?${queryParams}` : ''}`;
+  return apiCall(endpoint, { method: 'GET' });
+};

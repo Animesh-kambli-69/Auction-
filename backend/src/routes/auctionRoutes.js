@@ -6,6 +6,7 @@ import {
   getAllAuctions,
   getAuctionById,
   createAuction,
+  getMyListingRequests,
   updateAuction,
   deleteAuction,
   searchAuctions,
@@ -27,6 +28,7 @@ const createValidation = [
 // Public routes
 router.get('/', getAllAuctions);
 router.get('/search', searchAuctions);
+router.get('/my-requests', protect, getMyListingRequests);
 router.get('/:id', getAuctionById);
 
 // Protected routes

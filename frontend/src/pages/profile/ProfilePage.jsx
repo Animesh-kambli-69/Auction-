@@ -1,99 +1,256 @@
+import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../components/common/Navigation'
-import '../AuctionDetailPage.css'
+import { getCurrentUser, updateUserProfile } from '../../api/auth'
+import './ProfilePage.css'
 
-export default function ProfilePage() {
-  const { isLoggedIn, currentUser } = useAuth()
+const emptyForm = {
+  name: '',
+  email: '',
+  bio: '',
+  location: '',
+  phone: '',
+}
+
+export default function ProfilePage({ onBack }) {
+  const { isLoggedIn, currentUser, updateCurrentUser } = useAuth()
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+  const [isEditing, setIsEditing] = useState(false)
+  const [form, setForm] = useState(emptyForm)
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setLoading(false)
+      return
+    }
+
+    const loadProfile = async () => {
+      try {
+        setLoading(true)
+        const response = await getCurrentUser()
+        const user = response.user || null
+
+        setForm({
+          name: user?.name || '',
+          email: user?.email || '',
+          bio: user?.bio || '',
+          location: user?.location || '',
+          phone: user?.phone || '',
+        })
+
+        if (user) {
+          updateCurrentUser(user)
+        }
+
+        setError('')
+      } catch (requestError) {
+        setError(requestError.message || 'Failed to load profile')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadProfile()
+  }, [isLoggedIn, updateCurrentUser])
+
+  const initials = useMemo(() => {
+    if (!form.name) return 'U'
+    return form.name
+      .split(' ')
+      .map((token) => token.charAt(0))
+      .join('')
+      .slice(0, 2)
+      .toUpperCase()
+  }, [form.name])
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target
+    setForm((previousForm) => ({
+      ...previousForm,
+      [name]: value,
+    }))
+  }
+
+  const handleCancel = () => {
+    setForm({
+      name: currentUser?.name || '',
+      email: currentUser?.email || '',
+      bio: currentUser?.bio || '',
+      location: currentUser?.location || '',
+      phone: currentUser?.phone || '',
+    })
+    setIsEditing(false)
+    setMessage('')
+    setError('')
+  }
+
+  const handleSave = async (event) => {
+    event.preventDefault()
+    setMessage('')
+    setError('')
+
+    try {
+      const response = await updateUserProfile({
+        name: form.name,
+        bio: form.bio,
+        location: form.location,
+        phone: form.phone,
+      })
+
+      const updatedUser = response.user || form
+      updateCurrentUser({
+        ...currentUser,
+        ...updatedUser,
+      })
+
+      setForm((previousForm) => ({
+        ...previousForm,
+        name: updatedUser.name || previousForm.name,
+        bio: updatedUser.bio || '',
+        location: updatedUser.location || '',
+        phone: updatedUser.phone || '',
+      }))
+
+      setIsEditing(false)
+      setMessage('Profile updated successfully.')
+    } catch (requestError) {
+      setError(requestError.message || 'Failed to update profile')
+    }
+  }
 
   if (!isLoggedIn) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <h2>Please log in to view your profile</h2>
-      </div>
+      <main className="profile-page">
+        <div className="profile-container">
+          <div className="profile-content">
+            <h2>Please log in to view your profile</h2>
+          </div>
+        </div>
+      </main>
     )
   }
 
   return (
     <main className="profile-page">
-      <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-        <h1>User Profile</h1>
-        
-        <div className="profile-card" style={{ 
-          border: '1px solid #ddd', 
-          padding: '2rem', 
-          borderRadius: '8px',
-          marginTop: '2rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '2rem' }}>
-            <div style={{
-              width: '100px',
-              height: '100px',
-              borderRadius: '50%',
-              backgroundColor: '#e0e0e0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '48px',
-              fontWeight: 'bold'
-            }}>
-              {currentUser?.name?.charAt(0) || 'U'}
-            </div>
-            <div>
-              <h2>{currentUser?.name || 'User'}</h2>
-              <p style={{ color: '#666' }}>{currentUser?.email}</p>
-            </div>
+      <div className="profile-container">
+        <header className="profile-header">
+          <button type="button" className="action-btn" onClick={onBack}>
+            Back to auctions
+          </button>
+          <div className="profile-avatar">{initials}</div>
+          <div className="profile-info">
+            <h1>{form.name || 'User'}</h1>
+            <p className="email">{form.email}</p>
           </div>
+        </header>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '2rem' }}>
-            <div>
-              <h3>Bio</h3>
-              <p>{currentUser?.bio || 'No bio added yet'}</p>
-            </div>
-            <div>
-              <h3>Location</h3>
-              <p>{currentUser?.location || 'Not specified'}</p>
-            </div>
-            <div>
-              <h3>Contact</h3>
-              <p>{currentUser?.phone || 'Not provided'}</p>
-            </div>
-            <div>
-              <h3>Member Since</h3>
-              <p>Member</p>
-            </div>
-          </div>
+        <section className="profile-content">
+          {loading ? <p>Loading profile...</p> : null}
+          {error ? <p className="message message--error">{error}</p> : null}
+          {message ? <p className="message">{message}</p> : null}
 
-          <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #ddd' }}>
-            <h3>Account Statistics</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
-              <div style={{ padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
-                <p style={{ color: '#666', marginBottom: '0.5rem' }}>Total Bids</p>
-                <p style={{ fontSize: '24px', fontWeight: 'bold' }}>0</p>
+          {!loading && !isEditing ? (
+            <div className="profile-card">
+              <div className="profile-field">
+                <label>Name</label>
+                <p>{form.name || 'Not set'}</p>
               </div>
-              <div style={{ padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
-                <p style={{ color: '#666', marginBottom: '0.5rem' }}>Auctions Won</p>
-                <p style={{ fontSize: '24px', fontWeight: 'bold' }}>0</p>
+              <div className="profile-field">
+                <label>Email</label>
+                <p>{form.email || 'Not set'}</p>
               </div>
-              <div style={{ padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
-                <p style={{ color: '#666', marginBottom: '0.5rem' }}>Listings</p>
-                <p style={{ fontSize: '24px', fontWeight: 'bold' }}>0</p>
+              <div className="profile-field">
+                <label>Bio</label>
+                <p>{form.bio || 'No bio added yet'}</p>
               </div>
-            </div>
-          </div>
+              <div className="profile-field">
+                <label>Location</label>
+                <p>{form.location || 'Not specified'}</p>
+              </div>
+              <div className="profile-field">
+                <label>Phone</label>
+                <p>{form.phone || 'Not provided'}</p>
+              </div>
 
-          <div style={{ marginTop: '2rem' }}>
-            <button style={{
-              padding: '0.75rem 1.5rem',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '1rem'
-            }}>
-              Edit Profile
-            </button>
-          </div>
-        </div>
+              <div className="stats-grid">
+                <div className="stat-box">
+                  <p className="stat-label">Total Bids</p>
+                  <p className="stat-value">{currentUser?.totalBids || 0}</p>
+                </div>
+                <div className="stat-box">
+                  <p className="stat-label">Auctions Won</p>
+                  <p className="stat-value">{currentUser?.totalWins || 0}</p>
+                </div>
+                <div className="stat-box">
+                  <p className="stat-label">Listings</p>
+                  <p className="stat-value">{currentUser?.totalListings || 0}</p>
+                </div>
+              </div>
+
+              <button type="button" className="edit-btn" onClick={() => setIsEditing(true)}>
+                Edit profile
+              </button>
+            </div>
+          ) : null}
+
+          {!loading && isEditing ? (
+            <form className="edit-form" onSubmit={handleSave}>
+              <div className="form-group">
+                <label htmlFor="profile-name">Name</label>
+                <input
+                  id="profile-name"
+                  name="name"
+                  value={form.name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="profile-email">Email</label>
+                <input id="profile-email" name="email" value={form.email} disabled />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="profile-bio">Bio</label>
+                <textarea
+                  id="profile-bio"
+                  name="bio"
+                  value={form.bio}
+                  onChange={handleInputChange}
+                  rows="4"
+                  placeholder="Tell others about yourself"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="profile-location">Location</label>
+                <input
+                  id="profile-location"
+                  name="location"
+                  value={form.location}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="profile-phone">Phone</label>
+                <input
+                  id="profile-phone"
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="form-actions">
+                <button type="submit" className="save-btn">Save changes</button>
+                <button type="button" className="cancel-btn" onClick={handleCancel}>Cancel</button>
+              </div>
+            </form>
+          ) : null}
+        </section>
       </div>
     </main>
   )

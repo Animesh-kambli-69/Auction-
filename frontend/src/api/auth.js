@@ -6,13 +6,25 @@ import { apiCall } from './index';
  * @param {string} name - User's name
  * @param {string} email - User's email
  * @param {string} password - User's password
+ * @param {string} confirmPassword - Password confirmation
  * @returns {Promise} User data and auth token
  */
-export const registerUser = async (name, email, password) => {
-  return apiCall('/api/auth/register', {
+export const registerUser = async (name, email, password, confirmPassword = password) => {
+  const data = await apiCall('/api/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ name, email, password, confirmPassword }),
   });
+
+  if (data.token) {
+    localStorage.setItem('authToken', data.token);
+    localStorage.setItem('token', data.token);
+  }
+
+  if (data.user) {
+    localStorage.setItem('user', JSON.stringify(data.user));
+  }
+
+  return data;
 };
 
 /**
@@ -30,6 +42,10 @@ export const loginUser = async (email, password) => {
   // Store token for subsequent requests
   if (data.token) {
     localStorage.setItem('authToken', data.token);
+    localStorage.setItem('token', data.token);
+  }
+
+  if (data.user) {
     localStorage.setItem('user', JSON.stringify(data.user));
   }
   
@@ -41,16 +57,17 @@ export const loginUser = async (email, password) => {
  * @returns {Promise} Logout confirmation
  */
 export const logoutUser = async () => {
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('user');
-  
   // Optional: Notify backend
   try {
-    return await apiCall('/api/auth/logout', {
+    await apiCall('/api/auth/logout', {
       method: 'POST',
     });
-  } catch (error) {
+  } catch {
     console.log('Logout from server failed, but local session cleared');
+  } finally {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   }
 };
 

@@ -5,19 +5,27 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { requestLogger } from './middleware/logging.js';
 import { errorMiddleware } from './utils/errorHandler.js';
+import { isOriginAllowed } from './config/cors.js';
 
 // Import routes
 import authRoutes from './routes/authRoutes.js';
 import auctionRoutes from './routes/auctionRoutes.js';
 import bidRoutes from './routes/bidRoutes.js';
 import activityRoutes from './routes/activityRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
 
 // ==================== SECURITY MIDDLEWARE ====================
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (isOriginAllowed(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS blocked origin: ${origin || 'unknown'}`));
+  },
   credentials: true,
 }));
 
@@ -42,6 +50,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/auctions', auctionRoutes);
 app.use('/api/bids', bidRoutes);
 app.use('/api/activity', activityRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ==================== 404 HANDLER ====================
 app.use((req, res) => {

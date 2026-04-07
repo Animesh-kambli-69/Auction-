@@ -1,0 +1,117 @@
+/* frontend/src/pages/auction/SearchPage.css */
+
+.search-page {
+  background: #f9f9f9;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.search-header {
+  max-width: 1200px;
+  margin: 0 auto 40px;
+  text-align: center;
+}
+
+.search-header h1 {
+  margin: 0 0 12px 0;
+  font-size: 32px;
+  color: #333;
+}
+
+.search-query {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+}
+
+.search-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 30px;
+}
+
+.sidebar {
+  height: fit-content;
+}
+
+.content {
+  flex: 1;
+}
+
+.results-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+.result-count {
+  margin: 0;
+  color: #666;
+  font-size: 15px;
+}
+
+.auctions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 24px;
+}
+
+.loading,
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.loading {
+  font-size: 16px;
+}
+
+.empty-state p {
+  margin: 8px 0;
+}
+
+.empty-state .hint {
+  font-size: 14px;
+  color: #999;
+}
+
+@media (max-width: 1024px) {
+  .search-container {
+    grid-template-columns: 250px 1fr;
+    gap: 20px;
+  }
+
+  .auctions-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .search-container {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .search-header h1 {
+    font-size: 24px;
+  }
+
+  .auctions-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+}

@@ -6,7 +6,17 @@ const activitySchema = new mongoose.Schema(
   {
     type: {
       type: String,
-      enum: ['bid_placed', 'auction_won', 'auction_created', 'auction_ended', 'item_watched', 'bid_outbid'],
+      enum: [
+        'bid_placed',
+        'auction_won',
+        'auction_created',
+        'auction_submitted',
+        'auction_approved',
+        'auction_rejected',
+        'auction_ended',
+        'item_watched',
+        'bid_outbid',
+      ],
       required: true,
     },
     user: {
