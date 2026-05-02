@@ -9,7 +9,7 @@ import {
   getWonAuctions,
   validateBid,
 } from '../controllers/bidController.js';
-import { protect } from '../middleware/auth.js';
+import { protect, authorize } from '../middleware/auth.js';
 import { handleValidationErrors } from '../middleware/validation.js';
 
 const router = express.Router();
@@ -24,7 +24,7 @@ router.get('/auction/:auctionId', getBidHistory);
 router.post('/validate', bidValidation, handleValidationErrors, validateBid);
 
 // Protected routes
-router.post('/', protect, bidValidation, handleValidationErrors, placeBid);
+router.post('/', protect, authorize('buyer', 'seller'), bidValidation, handleValidationErrors, placeBid);
 router.get('/my-bids', protect, getMyBids);
 router.get('/won-auctions', protect, getWonAuctions);
 

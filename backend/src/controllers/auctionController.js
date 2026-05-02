@@ -82,7 +82,11 @@ export const getAllAuctions = asyncHandler(async (req, res, next) => {
   }
 
   if (search && search.trim()) {
-    filter.$text = { $search: search.trim() };
+    const searchRegex = new RegExp(search.trim(), 'i');
+    filter.$or = [
+      { title: searchRegex },
+      { description: searchRegex }
+    ];
   }
 
   if (parsedEndingSoonHours !== null && parsedEndingSoonHours > 0) {
@@ -321,4 +325,48 @@ export const searchAuctions = asyncHandler(async (req, res, next) => {
   req.query.status = req.query.status || 'active';
 
   return getAllAuctions(req, res, next);
+});
+
+export const processPayment = asyncHandler(async (req, res, next) => {
+  const { address } = req.body;
+  const auction = await Auction.findById(req.params.id);
+
+  if (!auction) {
+    return next(new AppError('Auction not found', 404));
+  }
+
+  if (auction.status !== 'ended') {
+    return next(new AppError('Auction is not ended yet', 400));
+  }
+
+  if (!auction.winner || auction.winner.toString() !== req.user._id.toString()) {
+    return next(new AppError('Only the winner can pay for this auction', 403));
+  }
+
+  if (auction.payment?.status === 'paid') {
+    return next(new AppError('This auction has already been paid for', 400));
+  }
+
+  // Simulate Stripe payment processing
+  auction.payment = {
+    status: 'paid',
+    transactionId: `txn_${Math.random().toString(36).substr(2, 9)}`,
+    paidAt: new Date(),
+    shippingAddress: address || 'No address provided',
+  };
+
+  await auction.save();
+
+  await Activity.logActivity(
+    'payment_completed',
+    req.user._id,
+    auction._id,
+    `completed payment for auction "${auction.title}"`
+  );
+
+  res.status(200).json({
+    success: true,
+    message: 'Payment successful',
+    payment: auction.payment,
+  });
 });

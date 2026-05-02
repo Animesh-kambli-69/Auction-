@@ -1,0 +1,186 @@
+# AuctionHub — Full-Fledge Feature Roadmap
+
+Based on a thorough audit of your current codebase (models, routes, controllers, and frontend pages), here's what's built, what's missing, and what would make this a truly production-ready auction platform.
+
+---
+
+## ✅ Already Built
+
+| Feature | Status |
+|---|---|
+| Auth (Register / Login / JWT) | ✅ Done |
+| Auction CRUD + Image Upload | ✅ Done |
+| Real-time Bidding (Socket.io) | ✅ Done |
+| Anti-snipe + Duplicate Bid Prevention | ✅ Done |
+| Admin Approval Workflow | ✅ Done |
+| Watchlist | ✅ Done |
+| Bid History | ✅ Done |
+| Activity Log | ✅ Done |
+| Seller Reviews (per-auction) | ✅ Done |
+| Site Platform Reviews | ✅ Done (added today) |
+| Landing Page Sections (About, Contact, Reviews) | ✅ Done (added today) |
+| Top 3 Auctions on Landing | ✅ Done (added today) |
+
+---
+
+## 🔴 High Priority — Core Auction Functionality
+
+### 1. User Profile Page ✅ Done
+**What's missing:** You have `avatar`, `bio`, `location`, `phone`, `totalBids`, `totalWins` fields in the User model but **zero frontend UI** for editing or viewing them.
+
+- View own profile (stats, bids won, listings created)
+- Edit name, avatar, bio, location, phone
+- Public seller profile page (visible to buyers)
+
+### 2. Notifications System
+**What's missing:** No in-app notification center.
+
+- "You've been outbid" — alert users when someone places a higher bid
+- "Auction ending soon" — 1 hour / 15 min reminder
+- "You won an auction"
+- "Your listing was approved/rejected"
+- Mark as read / clear all
+
+> Backend model already partially implied via `Activity.js` — notifications could share this layer.
+
+### 3. Payment Integration ✅ Done
+**What's missing:** There is NO payment flow. After winning an auction, nothing happens.
+
+- Stripe / Razorpay checkout flow for winners
+- Payment status stored on auction (`payment: { status, transactionId, paidAt }`)
+- Invoice / receipt generation
+
+### 4. Winner Flow (Post-Auction) ✅ Done
+**What's missing:** Auction ends → winner has no next steps.
+
+- "Congratulations, you won!" page
+- Shipping address collection
+- Order tracking status
+- Seller marking item as "shipped"
+
+---
+
+## 🟠 Medium Priority — UX & Engagement
+
+### 5. Advanced Search & Filters ✅ Done
+**What's there:** Basic `/search` page exists.
+
+**What's missing:**
+- Filter by price range (slider)
+- Filter by category, condition, location
+- Sort by: ending soonest, price low/high, most bids
+- Saved search alerts ("notify me when a Rolex goes up")
+
+### 6. Auction Categories Page ✅ Done
+**What's missing:** No dedicated browsing by category.
+
+- `/category/watches`, `/category/art` etc.
+- Category landing pages with hero images
+- Item count per category
+
+### 7. Seller Dashboard Enhancement ✅ Done
+**What's there:** Basic dashboard exists.
+
+**What's missing:**
+- Earnings analytics (total earned, pending payments)
+- Performance stats (views per listing, bid-to-view ratio)
+- Manage active listings (edit/cancel)
+
+### 8. Buyer Dashboard Enhancement ✅ Done
+**What's there:** Basic dashboard.
+
+**What's missing:**
+- "Auctions I'm Winning" vs "Auctions I've Lost"
+- Watchlist section with "Ending Soon" alerts
+- Purchase history / orders
+
+### 9. Featured / Promoted Auctions
+- Sellers can pay to "feature" their listing on the homepage
+- Featured badge / spotlight carousel on Landing page
+
+---
+
+## 🟡 Nice-to-Have — Trust & Safety
+
+### 10. Email Verification & Password Reset ✅ Done
+**What's missing:** `isVerified` exists on User model but no email flow exists.
+
+- Verification email on sign-up (Nodemailer / SendGrid)
+- "Forgot Password" → email link → reset form
+
+### 11. Two-Factor Authentication (2FA)
+- TOTP-based (Google Authenticator) or SMS OTP
+
+### 12. Identity Verification for Sellers
+**What's there:** `isVerified` flag.
+
+**What's missing:**
+- KYC document upload flow
+- Admin review of seller verification
+- "Verified Seller" badge on listings
+
+### 13. Report & Flag System ✅ Done
+- Report a suspicious listing
+- Report a user for bad behavior
+- Admin moderation queue for flagged content
+
+### 14. Dispute Resolution ✅ Done
+- Buyer raises dispute ("item not as described")
+- Seller responds
+- Admin mediates
+
+---
+
+## 🔵 Scaling & Polish
+
+### 15. Real-time Bid Feed / Live Ticker ✅ Done
+- A live ticker on the homepage showing recent bids across the platform
+- "Someone just bid $1,200 on Vintage Rolex Submariner" notifications
+
+### 16. SEO & Meta Tags
+- Dynamic `<title>` and `<meta description>` per auction page
+- Open Graph tags for social sharing
+
+### 17. Mobile Responsiveness Audit
+- Ensure all pages (Dashboard, AuctionDetail, CreateListing) are fully responsive
+- Consider a mobile-first navbar with a hamburger menu
+
+### 18. Auction Scheduling
+**What's there:** `startDate` field exists but isn't used on the frontend.
+
+- Sellers schedule auctions to start at a future date/time
+- "Upcoming Auctions" section on homepage
+
+### 19. Auto-Extend (Anti-Snipe) Visibility
+- Show a timer badge: "Bid placed — extended by 5 min" in real-time on the UI
+
+### 20. Dark/Light Mode Toggle
+- Theme toggle in the navbar
+
+---
+
+## Priority Order Recommendation
+
+```
+P0 (Ship these first — platform is incomplete without them)
+  → User Profile Page
+  → Payment Integration (Stripe)
+  → Winner / Post-Auction Flow
+
+P1 (Strongly improves trust & engagement)
+  → Notifications System
+  → Email Verification + Password Reset
+  → Advanced Search & Filters
+
+P2 (Differentiators)
+  → Seller Identity Verification
+  → Category Browse Pages
+  → Dispute Resolution
+  → Featured Auctions
+```
+
+> [!IMPORTANT]
+> **The most critical missing piece is the Payment & Winner Flow.** Right now, an auction ends and nothing happens — there's no way for a winner to pay, and no way for a seller to know. This is the #1 gap between "demo project" and "real product".
+
+> [!TIP]
+> **Notifications** can be built quickly using your existing Socket.io setup — you already have a real-time channel. Just emit events to specific user rooms on bid events and auction endings.
