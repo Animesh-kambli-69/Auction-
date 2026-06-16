@@ -12,6 +12,7 @@ import {
   deleteAuction,
   getMinimumBid,
   searchAuctions,
+  processPayment,
 } from '../controllers/auctionController.js';
 import { protect, authorize } from '../middleware/auth.js';
 import { handleValidationErrors } from '../middleware/validation.js';
@@ -36,8 +37,9 @@ router.get('/:id/minimum-bid', getMinimumBid);
 router.get('/:id', getAuctionById);
 
 // Protected routes
-router.post('/', protect, createValidation, handleValidationErrors, createAuction);
-router.put('/:id', protect, updateAuction);
-router.delete('/:id', protect, deleteAuction);
+router.post('/', protect, authorize('seller', 'buyer'), createValidation, handleValidationErrors, createAuction);
+router.put('/:id', protect, authorize('seller', 'buyer', 'admin', 'superadmin'), updateAuction);
+router.post('/:id/pay', protect, processPayment);
+router.delete('/:id', protect, authorize('seller', 'admin', 'superadmin'), deleteAuction);
 
 export default router;

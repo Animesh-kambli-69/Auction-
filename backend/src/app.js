@@ -15,6 +15,8 @@ import activityRoutes from './routes/activityRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import watchlistRoutes from './routes/watchlistRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import siteReviewRoutes from './routes/siteReviewRoutes.js';
+import trustRoutes from './routes/trustRoutes.js';
 
 const app = express();
 
@@ -55,6 +57,8 @@ app.use('/api/activity', activityRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/watchlist', watchlistRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/site-reviews', siteReviewRoutes);
+app.use('/api/trust', trustRoutes);
 
 // ==================== 404 HANDLER ====================
 app.use((req, res) => {

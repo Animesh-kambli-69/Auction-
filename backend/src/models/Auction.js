@@ -129,6 +129,22 @@ const auctionSchema = new mongoose.Schema(
       ref: 'User',
       default: null,
     },
+    payment: {
+      status: {
+        type: String,
+        enum: ['pending', 'paid', 'failed'],
+        default: 'pending',
+      },
+      transactionId: {
+        type: String,
+      },
+      paidAt: {
+        type: Date,
+      },
+      shippingAddress: {
+        type: String,
+      },
+    },
     bidCount: {
       type: Number,
       default: 0,

@@ -45,6 +45,11 @@ export const placeBid = asyncHandler(async (req, res, next) => {
     return next(new AppError('Seller cannot bid on their own auction', 400));
   }
 
+  // Prevent bidding against oneself
+  if (previousBidderId === req.user._id.toString()) {
+    return next(new AppError('You are already the highest bidder', 400));
+  }
+
   // Validate bid amount
   const minimumBid = auction.currentBid + auction.increment;
   if (parsedBidAmount < minimumBid) {
