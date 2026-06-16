@@ -1,17 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700&display=swap');
 
 :root {
-  --color-bg: #09090b;
-  --color-surface: #18181b;
-  --color-border: rgba(255, 255, 255, 0.1);
-  --color-text: #ffffff;
-  --color-text-muted: #a1a1aa;
+  /* Dynamic Perspective Theme Variables */
+  --color-bg: #030305;
+  --color-surface: rgba(20, 20, 25, 0.6);
+  --color-surface-hover: rgba(30, 30, 40, 0.8);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-glow: rgba(99, 102, 241, 0.5);
   
-  --color-primary: #3b82f6;
-  --color-primary-hover: #2563eb;
+  --color-text: #f8fafc;
+  --color-text-muted: #94a3b8;
+  
+  --color-primary: #6366f1;
+  --color-primary-hover: #818cf8;
+  --color-accent: #ec4899;
   
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-display: 'Outfit', system-ui, sans-serif;
+  
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+  --shadow-perspective: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
 }
 
 * {
@@ -22,15 +30,97 @@
 
 body {
   background-color: var(--color-bg);
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.05), transparent 25%);
+  background-attachment: fixed;
   color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 ::selection {
-  background: rgba(59, 130, 246, 0.3);
+  background: rgba(99, 102, 241, 0.4);
   color: white;
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+  background: var(--color-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.glass-nav {
+  background: rgba(3, 3, 5, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* Perspective Utilities for Gallery Entry */
+.perspective-container {
+  perspective: 1200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.perspective-card {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s ease;
+  will-change: transform;
+}
+
+.perspective-card:hover {
+  transform: rotateY(10deg) rotateX(5deg) scale3d(1.02, 1.02, 1.02);
+  box-shadow: var(--shadow-perspective), var(--shadow-glow);
+  border-color: var(--color-border-glow);
+}
+
+.perspective-card-inner {
+  transform: translateZ(30px); /* Brings content forward during 3D rotate */
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Dynamic Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
 }
 
 .loading-screen {
