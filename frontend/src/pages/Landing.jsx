@@ -46,13 +46,18 @@ export default function Landing() {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
-          </button>
-        </div>
-        
-        <div className="hero-visual">
-          <div className="gavel-animation">
-            <div className="gavel"></div>
-            <div className="base"></div>
+        <div className="hero-visual perspective-container">
+          <div className="stitch-screenshots">
+            <img 
+              src="/images/gallery_perspective.png" 
+              alt="Gallery Entry - Perspective View" 
+              className="stitch-img img-front perspective-card"
+            />
+            <img 
+              src="/images/bidding_focus.png" 
+              alt="Bidding Interface - Final Focus" 
+              className="stitch-img img-back perspective-card"
+            />
           </div>
         </div>
       </section>
