@@ -134,17 +134,17 @@ export default function Home() {
       ) : (
         <div className="auction-grid">
           {activeAuctions.map(auction => (
-            <div key={auction._id} className="auction-card">
+            <div key={auction._id} className="auction-card perspective-card">
               <div 
                 className="auction-image" 
                 style={{ backgroundImage: `url(${auction.images?.[0]?.url || 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=800'})`, cursor: 'pointer', position: 'relative' }}
                 onClick={() => window.location.href = `/auction/${auction._id}`}
               >
-                <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.7)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem' }}>
+                <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.7)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.85rem', backdropFilter: 'blur(8px)' }}>
                   ⏳ {formatRemainingTime(auction.endDate)}
                 </div>
               </div>
-              <div className="auction-details">
+              <div className="auction-details perspective-card-inner">
                 <h3 style={{ cursor: 'pointer' }} onClick={() => window.location.href = `/auction/${auction._id}`}>{auction.title}</h3>
                 <div className="auction-footer">
                   <span className="current-bid">
@@ -152,9 +152,11 @@ export default function Home() {
                     ${(auction.currentBid || auction.startingPrice).toLocaleString()}
                   </span>
                   {isHighestBidder(auction) ? (
-                    <button className="bid-btn" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>You're winning</button>
+                    <button className="bid-btn" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>Winning</button>
                   ) : (
-                    <button className="bid-btn" onClick={() => handleBid(auction._id, auction.currentBid || auction.startingPrice, auction)}>Quick Bid +$10</button>
+                    <button className="bid-btn" onClick={() => handleBid(auction._id, auction.currentBid || auction.startingPrice, auction)}>
+                      <span style={{ position: 'relative', zIndex: 1 }}>Bid +$10</span>
+                    </button>
                   )}
                 </div>
               </div>
@@ -165,23 +167,23 @@ export default function Home() {
 
       {endedAuctions.length > 0 && (
         <>
-          <header className="home-header" style={{ marginTop: '3rem' }}>
+          <header className="home-header" style={{ marginTop: '5rem' }}>
             <h2>Ended Auctions</h2>
             <p>Past items that have already found their winners.</p>
           </header>
-          <div className="auction-grid" style={{ opacity: 0.7 }}>
+          <div className="auction-grid" style={{ opacity: 0.8 }}>
             {endedAuctions.map(auction => (
-              <div key={auction._id} className="auction-card">
+              <div key={auction._id} className="auction-card perspective-card" style={{ filter: 'grayscale(0.5)' }}>
                 <div 
                   className="auction-image" 
                   style={{ backgroundImage: `url(${auction.images?.[0]?.url || 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=800'})`, cursor: 'pointer' }}
                   onClick={() => window.location.href = `/auction/${auction._id}`}
                 >
-                  <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(200,0,0,0.8)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem' }}>
+                  <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(200,0,0,0.8)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.85rem', backdropFilter: 'blur(8px)' }}>
                     Ended
                   </div>
                 </div>
-                <div className="auction-details">
+                <div className="auction-details perspective-card-inner">
                   <h3 style={{ cursor: 'pointer' }} onClick={() => window.location.href = `/auction/${auction._id}`}>{auction.title}</h3>
                   <div className="auction-footer">
                     <span className="current-bid">

@@ -60,7 +60,7 @@ export default function Layout() {
 
   return (
     <div className="layout-container">
-      <nav className="navbar">
+      <nav className="navbar glass-nav">
         <div className="navbar-brand">
           <Link to="/home">AuctionHub</Link>
         </div>
@@ -74,7 +74,7 @@ export default function Layout() {
           />
         </form>
 
-        <div className="navbar-links" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <div className="navbar-links">
           <Link to="/home">Explore</Link>
           {isAuthenticated && (
             <>
@@ -85,14 +85,14 @@ export default function Layout() {
                 >
                   🔔
                   {unreadCount > 0 && (
-                    <span style={{ position: 'absolute', top: '-5px', right: '-10px', background: 'red', color: 'white', borderRadius: '50%', padding: '2px 6px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                    <span style={{ position: 'absolute', top: '-5px', right: '-10px', background: 'var(--color-accent)', color: 'white', borderRadius: '50%', padding: '2px 6px', fontSize: '0.75rem', fontWeight: 'bold' }}>
                       {unreadCount}
                     </span>
                   )}
                 </button>
                 
                 {showNotifications && (
-                  <div style={{ position: 'absolute', top: '40px', right: '0', width: '300px', background: '#18181b', border: '1px solid var(--color-border)', borderRadius: '12px', zIndex: 1000, boxShadow: '0 10px 25px rgba(0,0,0,0.5)', overflow: 'hidden' }}>
+                  <div className="glass-panel" style={{ position: 'absolute', top: '40px', right: '0', width: '300px', zIndex: 1000, overflow: 'hidden' }}>
                     <div style={{ padding: '1rem', borderBottom: '1px solid var(--color-border)', fontWeight: 'bold' }}>Notifications</div>
                     <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                       {notifications.length === 0 ? (
@@ -119,13 +119,13 @@ export default function Layout() {
               )}
             </>
           )}
-          <button className="auth-btn" onClick={handleAuthAction}>
+          <button className="btn-primary" onClick={handleAuthAction}>
             {isAuthenticated ? 'Logout' : 'Login'}
           </button>
         </div>
       </nav>
       
-      <main className="main-content">
+      <main className="main-content perspective-container" style={{ display: 'block' }}>
         <Outlet />
       </main>
 
