@@ -104,9 +104,10 @@ export default function Landing() {
           className="scene-content right-aligned"
           style={{ opacity: opacity2 }}
         >
-          <h2 className="cinematic-heading text-gradient">Depth Layering</h2>
+          <h2 className="cinematic-heading text-gradient">Fair value Guaranteed</h2>
           <p className="cinematic-desc">
-            Experience the layers. The frame detaches in 3D space, revealing the soul of the artwork through soft, realistic shadows.
+           We Fetch the Best Value for Your Valuables.
+           so that  you can get the best price for your valuable items. Our team of experts will ensure that you receive a fair and accurate valuation, so you can sell with confidence.
           </p>
         </motion.div>
       </section>
@@ -124,9 +125,10 @@ export default function Landing() {
           className="scene-content left-aligned"
           style={{ opacity: opacity3 }}
         >
-          <h2 className="cinematic-heading text-gradient">Narrative Scroll</h2>
+          <h2 className="cinematic-heading text-gradient">Narrative</h2>
           <p className="cinematic-desc">
-            Discover the history. Elegant 3D text annotations stitched directly to the canvas highlight the medium, the provenance, and the legend.
+            A place where ur collection can reach to new buyers.
+            UR price Is based on the market value and the demand for the item. We will help you to get the best price for your valuable items.
           </p>
         </motion.div>
       </section>
