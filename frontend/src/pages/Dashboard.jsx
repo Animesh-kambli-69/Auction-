@@ -129,7 +129,7 @@ export default function Dashboard() {
                     <li key={auction._id} className="detailed-item">
                       <div className="item-info">
                         <h4>{auction.title}</h4>
-                        <p className="meta">Sold by {auction.seller?.name || 'Unknown'} for ${auction.currentBid?.toLocaleString()}</p>
+                        <p className="meta">Sold by {auction.seller?.name || 'Unknown'} for ₹{auction.currentBid?.toLocaleString()}</p>
                       </div>
                       <div className="item-actions">
                         {auction.payment?.status === 'paid' ? (
@@ -210,7 +210,7 @@ export default function Dashboard() {
                     {winningBids.map(bid => (
                       <li key={bid._id} className="list-item" onClick={() => navigate(`/auction/${bid.auction?._id}`)}>
                         <span className="truncate">{bid.auction?.title}</span>
-                        <strong className="amount winning-text">${bid.amount}</strong>
+                        <strong className="amount winning-text">₹{bid.amount}</strong>
                       </li>
                     ))}
                   </ul>
@@ -227,7 +227,7 @@ export default function Dashboard() {
                       <li key={bid._id} className="list-item outbid" onClick={() => navigate(`/auction/${bid.auction?._id}`)}>
                         <span className="truncate">{bid.auction?.title}</span>
                         <div className="outbid-action">
-                          <strong className="amount">${bid.amount}</strong>
+                          <strong className="amount">₹{bid.amount}</strong>
                           <span className="bid-again-link">Bid Again</span>
                         </div>
                       </li>
@@ -256,11 +256,11 @@ export default function Dashboard() {
         <div className="dashboard-content seller-content">
           <div className="dashboard-stats-row">
             <div className="stat-card seller-stat highlight">
-              <h3>${totalEarnings.toLocaleString()}</h3>
+              <h3>₹{totalEarnings.toLocaleString()}</h3>
               <p>Total Lifetime Earnings</p>
             </div>
             <div className="stat-card seller-stat">
-              <h3>${pendingPayments.toLocaleString()}</h3>
+              <h3>₹{pendingPayments.toLocaleString()}</h3>
               <p>Pending Payments</p>
             </div>
             <div className="stat-card seller-stat">
@@ -287,7 +287,7 @@ export default function Dashboard() {
                       <div className="item-info">
                         <h4>{auction.title}</h4>
                         <div className="seller-meta">
-                          <span>Current Bid: <strong>${auction.currentBid?.toLocaleString()}</strong></span>
+                          <span>Current Bid: <strong>₹{auction.currentBid?.toLocaleString()}</strong></span>
                           <span>•</span>
                           <span>{auction.bidCount} Bids</span>
                           <span>•</span>
@@ -327,7 +327,7 @@ export default function Dashboard() {
                     {soldListings.slice(0, 5).map(auction => (
                       <li key={auction._id} className="list-item" onClick={() => navigate(`/auction/${auction._id}`)}>
                         <span className="truncate">{auction.title}</span>
-                        <strong className="amount success-text">+${auction.currentBid?.toLocaleString()}</strong>
+                        <strong className="amount success-text">+₹{auction.currentBid?.toLocaleString()}</strong>
                       </li>
                     ))}
                   </ul>

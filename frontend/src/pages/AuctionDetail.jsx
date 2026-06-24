@@ -46,7 +46,7 @@ export default function AuctionDetail() {
         element.setAttribute('content', content);
       };
 
-      const description = `Bid on ${auction.title} starting at $${auction.startingPrice}. ${auction.description.substring(0, 100)}...`;
+      const description = `Bid on ${auction.title} starting at ₹${auction.startingPrice}. ${auction.description.substring(0, 100)}...`;
 
       setMetaTag('name', 'description', description);
       setMetaTag('property', 'og:title', `${auction.title} | AuctionHub`);
@@ -224,7 +224,7 @@ export default function AuctionDetail() {
                   {bids.map(b => (
                     <li key={b._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid var(--color-border)' }}>
                       <span>{b.bidder?.name || 'Unknown'}</span>
-                      <strong style={{ color: 'var(--color-primary)' }}>${b.amount}</strong>
+                      <strong style={{ color: 'var(--color-primary)' }}>₹{b.amount}</strong>
                     </li>
                   ))}
                 </ul>
@@ -237,12 +237,12 @@ export default function AuctionDetail() {
           <div className="bid-panel">
             <div className="current-price">
               <span className="label">Current Bid</span>
-              <h2>${(auction.currentBid || auction.startingPrice).toLocaleString()}</h2>
+              <h2>₹{(auction.currentBid || auction.startingPrice).toLocaleString()}</h2>
             </div>
             
             <div className="auction-meta">
               <p><strong>Condition:</strong> {auction.condition || 'Good'}</p>
-              <p><strong>Minimum Increment:</strong> ${auction.increment || 10}</p>
+              <p><strong>Minimum Increment:</strong> ₹{auction.increment || 10}</p>
               <p><strong>Start Date:</strong> {new Date(auction.createdAt || auction.startDate).toLocaleString()}</p>
               <p><strong>End Date:</strong> {new Date(auction.endDate).toLocaleString()}</p>
               

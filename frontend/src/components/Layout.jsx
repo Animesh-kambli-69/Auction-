@@ -20,7 +20,7 @@ export default function Layout() {
       socket.on('outbid_notification', (data) => {
         setNotifications(prev => [{
           id: Date.now(),
-          message: `You've been outbid on "${data.auctionTitle}"! Current bid is $${data.currentBid}.`,
+          message: `You've been outbid on "${data.auctionTitle}"! Current bid is ₹${data.currentBid}.`,
           type: 'warning',
           link: `/auction/${data.auctionId}`
         }, ...prev]);

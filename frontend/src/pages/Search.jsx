@@ -103,7 +103,7 @@ export default function Search() {
             </div>
 
             <div className="filter-group">
-              <label>Price Range ($)</label>
+              <label>Price Range (₹)</label>
               <div className="price-inputs">
                 <input 
                   type="number" 
@@ -173,7 +173,7 @@ export default function Search() {
                     <div className="card-footer">
                       <div className="price-block">
                         <span className="price-label">Current Bid</span>
-                        <span className="price-value">${(auction.currentBid || auction.startingPrice).toLocaleString()}</span>
+                        <span className="price-value">₹{(auction.currentBid || auction.startingPrice).toLocaleString()}</span>
                       </div>
                       <div className="bids-block">
                         <span>{auction.bidCount} Bids</span>

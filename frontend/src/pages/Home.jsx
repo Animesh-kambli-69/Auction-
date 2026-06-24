@@ -120,7 +120,7 @@ export default function Home() {
           <div className="ticker-scroll">
             {liveBids.map(bid => (
               <span key={bid.id} className="ticker-item">
-                <strong>{bid.bidderName}</strong> just bid <strong className="ticker-amount">${bid.amount.toLocaleString()}</strong> on <em>{bid.auctionTitle}</em>
+                <strong>{bid.bidderName}</strong> just bid <strong className="ticker-amount">₹{bid.amount.toLocaleString()}</strong> on <em>{bid.auctionTitle}</em>
               </span>
             ))}
           </div>
@@ -149,13 +149,13 @@ export default function Home() {
                 <div className="auction-footer">
                   <span className="current-bid">
                     <span className="bid-label">Current Bid</span>
-                    ${(auction.currentBid || auction.startingPrice).toLocaleString()}
+                    ₹{(auction.currentBid || auction.startingPrice).toLocaleString()}
                   </span>
                   {isHighestBidder(auction) ? (
                     <button className="bid-btn" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>Winning</button>
                   ) : (
                     <button className="bid-btn" onClick={() => handleBid(auction._id, auction.currentBid || auction.startingPrice, auction)}>
-                      <span style={{ position: 'relative', zIndex: 1 }}>Bid +$10</span>
+                      <span style={{ position: 'relative', zIndex: 1 }}>Bid +₹10</span>
                     </button>
                   )}
                 </div>
@@ -188,7 +188,7 @@ export default function Home() {
                   <div className="auction-footer">
                     <span className="current-bid">
                       <span className="bid-label">Final Price</span>
-                      ${(auction.currentBid || auction.startingPrice).toLocaleString()}
+                      ₹{(auction.currentBid || auction.startingPrice).toLocaleString()}
                     </span>
                     <button className="bid-btn" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>Ended</button>
                   </div>

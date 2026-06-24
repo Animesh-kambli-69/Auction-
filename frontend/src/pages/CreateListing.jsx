@@ -81,12 +81,12 @@ export default function CreateListing() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
-              <label>Starting Price ($)</label>
+              <label>Starting Price (₹)</label>
               <input type="number" name="startingPrice" value={formData.startingPrice} onChange={handleChange} required min="0" />
             </div>
             
             <div className="form-group">
-              <label>Bid Increment ($)</label>
+              <label>Bid Increment (₹)</label>
               <input type="number" name="increment" value={formData.increment} onChange={handleChange} required min="1" />
             </div>
           </div>
